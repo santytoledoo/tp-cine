@@ -1,0 +1,117 @@
+.butacas-container {
+  background-color: #141414;
+  color: white;
+  padding: 40px 20px;
+  font-family: sans-serif;
+  text-align: center;
+  min-height: 100vh;
+}
+
+h2 { color: #e50914; margin-bottom: 30px; }
+
+.pantalla {
+  background: linear-gradient(to bottom, #555, #222);
+  width: 80%;
+  max-width: 600px;
+  margin: 0 auto 50px auto;
+  padding: 10px;
+  border-radius: 5px 5px 50% 50%;
+  font-weight: bold;
+  letter-spacing: 5px;
+  box-shadow: 0 10px 20px rgba(255,255,255,0.1);
+}
+
+.mapa-scroll {
+  overflow-x: auto;
+  padding-bottom: 20px;
+}
+
+.mapa {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  min-width: 800px; /* Evita que las butacas se aplasten en pantallas chicas */
+}
+
+.fila {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+
+  .letra-fila {
+    width: 25px;
+    font-weight: bold;
+    color: #888;
+  }
+
+  .bloques-container {
+    display: flex;
+    gap: 40px; /* Este es el pasillo central de la consigna */
+  }
+
+  .bloque {
+    display: flex;
+    gap: 5px;
+  }
+}
+
+.butaca {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px 6px 2px 2px;
+  cursor: pointer;
+  transition: transform 0.2s, background-color 0.2s;
+
+  &.normal.libre { background-color: #555; }
+  &.accesible.libre { background-color: #007bff; } /* Azul para discapacidad */
+  &.vip.libre { background-color: #ffb700; } /* Dorado para VIP */
+
+  &.seleccionada { 
+    background-color: #4bff84 !important; 
+    transform: scale(1.2); 
+    box-shadow: 0 0 8px #4bff84;
+  }
+  
+  &.ocupada { 
+    background-color: #333 !important; 
+    cursor: not-allowed; 
+    opacity: 0.3; 
+  }
+
+  &:not(.ocupada):hover { 
+    transform: scale(1.2); 
+    filter: brightness(1.3); 
+  }
+}
+
+.leyenda {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 25px;
+  margin-top: 40px;
+  margin-bottom: 40px;
+  
+  .item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: bold;
+    .butaca { cursor: default; transform: none; }
+  }
+}
+
+.btn-continuar {
+  padding: 15px 40px;
+  background-color: #e50914;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  &:hover { background-color: #b20710; }
+}

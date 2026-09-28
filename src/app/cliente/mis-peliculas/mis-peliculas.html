@@ -1,0 +1,33 @@
+<div class="mis-peliculas-container">
+  <h2>Mi Historial de Películas Vistas</h2>
+  <p class="subtitulo">Reviví las funciones de las que participaste y calificá tus experiencias.</p>
+
+  <div class="grilla-historial" *ngIf="historialPeliculas.length > 0; else sinHistorial">
+    <div class="pelicula-historial-card" *ngFor="let item of historialPeliculas">
+      <div class="poster-box">
+        <img [src]="item.poster" [alt]="item.titulo">
+      </div>
+      <div class="detalle-box">
+        <h3>{{ item.titulo }}</h3>
+        <p class="fecha-sala">📅 Vista el: <strong>{{ item.fecha }}</strong> | 🎟️ {{ item.sala }}</p>
+        
+        <div class="calificacion-propia">
+          <span>Tu Calificación:</span>
+          <div class="estrellas-selector">
+            <span *ngFor="let star of [1,2,3,4,5]" 
+                  (click)="calificar(item, star)"
+                  [class.activa]="star <= item.calificacionUsuario">
+              ★
+            </span>
+          </div>
+        </div>
+
+        <p class="comentario-guardado"><em>"{{ item.comentario }}"</em></p>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #sinHistorial>
+    <p class="sin-historial">Aún no registraste funciones vistas en tu cuenta.</p>
+  </ng-template>
+</div>

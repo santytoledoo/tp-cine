@@ -1,0 +1,19 @@
+<div class="candy-container">
+  <h2>Candy Bar</h2>
+  <p>Sumá combos y productos a tu entrada para retirarlos con el mismo QR.</p>
+  
+  <div class="productos-grid">
+    <div class="producto-card" *ngFor="let p of productos">
+      <div class="icono">{{ p.img }}</div>
+      <h3>{{ p.nombre }}</h3>
+      <p class="precio">${{ p.precio }}</p>
+      <button (click)="agregarAlCarrito(p)">Sumar al carrito</button>
+    </div>
+  </div>
+
+  <div class="resumen" *ngIf="carrito.length > 0">
+    <h3>Tu Pedido</h3>
+    <p>Llevás {{ carrito.length }} productos por un total de <strong>${{ total }}</strong></p>
+    <button class="btn-pagar" (click)="finalizarCompra()">Finalizar Compra y Pagar</button>
+  </div>
+</div>

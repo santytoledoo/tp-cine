@@ -1,0 +1,35 @@
+<div class="home-container">
+  <header class="hero">
+    <div class="hero-content">
+      <h1>UTN Cinemas</h1>
+      <p>Viví la experiencia definitiva.</p>
+      
+      <div class="buscador">
+        <input type="text" [(ngModel)]="textoBusqueda" (keyup)="filtrar()" placeholder="Buscar por película o género (ej: Acción, Comedia)...">
+      </div>
+    </div>
+  </header>
+
+  <div class="contenido">
+    <h2 class="titulo-seccion">Cartelera Actual</h2>
+    
+    <div class="grilla-peliculas" *ngIf="peliculasFiltradas.length > 0; else sinResultados">
+      <div class="pelicula-card" *ngFor="let p of peliculasFiltradas">
+        <div class="poster-container">
+          <span class="edad">{{ p.restriccion_edad }}</span>
+          <span class="duracion">{{ p.duracion_minutos }} min</span>
+        </div>
+        
+        <div class="info">
+          <h3>{{ p.titulo }}</h3>
+          <p class="generos">{{ p.generos.join(', ') }}</p>
+          <button class="btn-comprar">Ver Funciones</button>
+        </div>
+      </div>
+    </div>
+
+    <ng-template #sinResultados>
+      <p class="sin-resultados">No se encontraron películas con esa búsqueda.</p>
+    </ng-template>
+  </div>
+</div>

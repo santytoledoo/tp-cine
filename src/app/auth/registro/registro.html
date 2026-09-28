@@ -1,0 +1,51 @@
+<div class="registro-container">
+  <h2>Registro de Usuario</h2>
+  <p>Completá tus datos para obtener tu cupón del 20% de descuento en tu primera compra.</p>
+
+  <form [formGroup]="registroForm" (ngSubmit)="registrar()">
+    
+    <div class="form-group">
+      <label>Email *</label>
+      <input type="email" formControlName="email" placeholder="ejemplo@correo.com">
+    </div>
+
+    <div class="form-group">
+      <label>Contraseña *</label>
+      <input type="password" formControlName="password" placeholder="Mínimo 6 caracteres">
+    </div>
+
+    <div class="form-group">
+      <label>Nombre *</label>
+      <input type="text" formControlName="nombre">
+    </div>
+
+    <div class="form-group">
+      <label>Apellido *</label>
+      <input type="text" formControlName="apellido">
+    </div>
+
+    <div class="form-group">
+      <label>Fecha de Nacimiento *</label>
+      <input type="date" formControlName="fecha_nacimiento">
+    </div>
+
+    <div class="form-group">
+      <label>Tipo de Sangre</label>
+      <input type="text" formControlName="tipo_sangre" placeholder="Ej: O+">
+    </div>
+
+    <div class="form-group">
+      <label>Color de Ojos</label>
+      <input type="text" formControlName="color_ojos" placeholder="Ej: Marrón">
+    </div>
+
+    <div class="form-group">
+      <label>Días de vacaciones al año</label>
+      <input type="number" formControlName="dias_vacaciones">
+    </div>
+
+    <button type="submit" [disabled]="registroForm.invalid">Registrarme</button>
+  </form>
+
+  <p *ngIf="mensaje" class="mensaje-alerta">{{ mensaje }}</p>
+</div>

@@ -1,0 +1,29 @@
+<div class="resenias-container">
+  <h3>Calificaciones y Reseñas</h3>
+  <div class="promedio">
+    <span class="nota">★ {{ promedio }}</span> / 5 Promedio general
+  </div>
+
+  <div class="form-resenia">
+    <h4>Dejá tu opinión</h4>
+    <select [(ngModel)]="nuevaEstrella">
+      <option value="5">★★★★★ (5)</option>
+      <option value="4">★★★★☆ (4)</option>
+      <option value="3">★★★☆☆ (3)</option>
+      <option value="2">★★☆☆☆ (2)</option>
+      <option value="1">★☆☆☆☆ (1)</option>
+    </select>
+    <input type="text" [(ngModel)]="nuevoComentario" placeholder="Escribí un comentario corto...">
+    <button (click)="agregarResenia()">Publicar</button>
+  </div>
+
+  <div class="lista-resenias">
+    <div class="item-resenia" *ngFor="let r of resenias">
+      <div class="header-resenia">
+        <strong>{{ r.usuario }}</strong>
+        <span class="estrellas">{{ '★'.repeat(r.estrellas) }}</span>
+      </div>
+      <p>{{ r.comentario }}</p>
+    </div>
+  </div>
+</div>

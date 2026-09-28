@@ -1,0 +1,34 @@
+<div class="admin-container">
+  <h2>Cargar Nueva Película</h2>
+  
+  <form [formGroup]="peliculaForm" (ngSubmit)="guardarPelicula()">
+    <div class="form-group"><input type="text" formControlName="titulo" placeholder="Título de la película *"></div>
+    <div class="form-group"><textarea formControlName="sinopsis" placeholder="Sinopsis *" rows="3"></textarea></div>
+    
+    <div class="form-row">
+      <div class="form-group"><input type="number" formControlName="duracion_minutos" placeholder="Duración (min) *"></div>
+      <div class="form-group"><input type="date" formControlName="fecha_estreno" title="Fecha de estreno"></div>
+    </div>
+
+    <div class="form-group"><input type="text" formControlName="imagen_url" placeholder="URL del Póster (opcional)"></div>
+    
+    <div class="form-group"><input type="text" formControlName="formatos" placeholder="Formatos (ej: 2D, 3D, 4D)"></div>
+    <div class="form-group"><input type="text" formControlName="idiomas" placeholder="Idiomas (ej: Castellano, Subtitulada)"></div>
+    <div class="form-group"><input type="text" formControlName="generos" placeholder="Géneros (ej: Acción, Comedia)"></div>
+    
+    <div class="form-row">
+      <div class="form-group">
+        <select formControlName="restriccion_edad">
+          <option value="ATP">ATP</option>
+          <option value="+13">+13 (Requiere adulto)</option>
+          <option value="+18">+18 (Requiere adulto)</option>
+        </select>
+      </div>
+      <div class="form-group"><input type="number" formControlName="precio_preventa" placeholder="Precio Preventa ($)"></div>
+    </div>
+
+    <button type="submit" [disabled]="peliculaForm.invalid">Guardar Película</button>
+  </form>
+
+  <p *ngIf="mensaje" class="mensaje-alerta">{{ mensaje }}</p>
+</div>

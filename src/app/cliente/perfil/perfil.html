@@ -1,0 +1,36 @@
+<div class="perfil-container">
+  <h2>Mi Perfil - UTN Cinemas</h2>
+  
+  <div class="tarjeta-info">
+    <h3>Información de Cuenta y Beneficios</h3>
+    <p><strong>Nombre y Apellido:</strong> {{ usuario.nombre }} {{ usuario.apellido }}</p>
+    <p><strong>Correo Electrónico:</strong> {{ usuario.email }}</p>
+    
+    <div class="saldos-box">
+      <div class="saldo-item">
+        <span class="etiqueta">⭐ Puntos Acumulados</span>
+        <span class="valor">{{ usuario.puntos }} pts</span>
+      </div>
+      <div class="saldo-item">
+        <span class="etiqueta">💰 Crédito a Favor</span>
+        <span class="valor">${{ usuario.creditoFavor }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="historial-canjes-section">
+    <h3>Historial de Canjes de Puntos</h3>
+    <div class="tabla-canjes" *ngIf="historialCanjes.length > 0; else sinCanjes">
+      <div class="item-canje" *ngFor="let canje of historialCanjes">
+        <div>
+          <strong>{{ canje.recompensa }}</strong>
+          <span class="fecha">Canjeado el {{ canje.fecha }}</span>
+        </div>
+        <span class="puntos-gastados">-{{ canje.puntosGastados }} pts</span>
+      </div>
+    </div>
+    <ng-template #sinCanjes>
+      <p class="sin-datos">Todavía no realizaste canjes con tus puntos del programa de fidelización.</p>
+    </ng-template>
+  </div>
+</div>

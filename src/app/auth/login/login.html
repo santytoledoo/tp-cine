@@ -1,0 +1,23 @@
+<div class="login-container">
+  <h2>Iniciar Sesión</h2>
+  
+  <form [formGroup]="loginForm" (ngSubmit)="iniciarSesion()">
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" formControlName="email" placeholder="ejemplo@correo.com">
+    </div>
+
+    <div class="form-group">
+      <label>Contraseña</label>
+      <input type="password" formControlName="password" placeholder="Tu contraseña">
+    </div>
+
+    <button type="submit" [disabled]="loginForm.invalid">Ingresar</button>
+  </form>
+
+  <p *ngIf="mensaje" class="mensaje-alerta">{{ mensaje }}</p>
+  
+  <p class="enlace-registro">
+    ¿No tenés cuenta? <a href="/registro">Registrate acá</a>
+  </p>
+</div>

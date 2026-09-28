@@ -1,0 +1,106 @@
+.mis-peliculas-container {
+  min-height: 100vh;
+  background-color: #141414;
+  color: #fff;
+  padding: 40px 5%;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+  h2 {
+    color: #e50914;
+    font-size: 2.2rem;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .subtitulo {
+    color: #aaa;
+    margin-bottom: 30px;
+    font-size: 1rem;
+  }
+
+  .grilla-historial {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .pelicula-historial-card {
+    background-color: #1f1f1f;
+    border-radius: 10px;
+    display: flex;
+    overflow: hidden;
+    border: 1px solid #333;
+    transition: transform 0.3s;
+
+    &:hover {
+      transform: translateY(-5px);
+      border-color: #e50914;
+    }
+
+    .poster-box {
+      width: 130px;
+      min-height: 160px;
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
+
+    .detalle-box {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+
+      h3 {
+        margin: 0 0 8px 0;
+        font-size: 1.4rem;
+        color: #fff;
+      }
+
+      .fecha-sala {
+        color: #ccc;
+        font-size: 0.95rem;
+        margin-bottom: 12px;
+      }
+
+      .calificacion-propia {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+        font-size: 0.9rem;
+        color: #bbb;
+
+        .estrellas-selector {
+          cursor: pointer;
+          span {
+            font-size: 1.4rem;
+            color: #555;
+            transition: color 0.2s;
+            &.activa {
+              color: #f5c518;
+            }
+            &:hover {
+              color: #ffdb4d;
+            }
+          }
+        }
+      }
+
+      .comentario-guardado {
+        color: #888;
+        font-size: 0.9rem;
+        margin: 0;
+      }
+    }
+  }
+
+  .sin-historial {
+    text-align: center;
+    color: #777;
+    font-size: 1.2rem;
+    margin-top: 50px;
+  }
+}

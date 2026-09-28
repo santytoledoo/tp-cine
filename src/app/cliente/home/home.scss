@@ -1,0 +1,123 @@
+.home-container {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #fff;
+  min-height: 100vh;
+  background-color: #141414;
+}
+
+.hero {
+  background: linear-gradient(to bottom, rgba(20, 20, 20, 0) 0%, rgba(20, 20, 20, 1) 100%), 
+              url('https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=2070') center/cover no-repeat;
+  height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  
+  .hero-content {
+    h1 {
+      font-size: 3.5rem;
+      color: #e50914;
+      margin: 0;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    p {
+      font-size: 1.2rem;
+      color: #ccc;
+      margin-bottom: 30px;
+    }
+  }
+
+  .buscador input {
+    width: 100%;
+    max-width: 500px;
+    padding: 15px 25px;
+    border-radius: 30px;
+    border: none;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    font-size: 16px;
+    outline: none;
+    border: 1px solid #444;
+    transition: border-color 0.3s;
+
+    &:focus {
+      border-color: #e50914;
+      background-color: rgba(0, 0, 0, 0.9);
+    }
+  }
+}
+
+.contenido {
+  padding: 40px 5%;
+}
+
+.titulo-seccion {
+  font-size: 2rem;
+  margin-bottom: 30px;
+  border-left: 5px solid #e50914;
+  padding-left: 15px;
+}
+
+.grilla-peliculas {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 30px;
+}
+
+.pelicula-card {
+  background-color: #222;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: transform 0.3s, box-shadow 0.3s;
+
+  &:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 20px rgba(229, 9, 20, 0.4);
+  }
+
+  .poster-container {
+    position: relative;
+    height: 180px;
+    background-color: #1f1f1f;
+    display: flex;
+    justify-content: space-between;
+    padding: 15px;
+
+    .edad, .duracion {
+      background-color: rgba(0, 0, 0, 0.8);
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-size: 12px;
+      font-weight: bold;
+      border: 1px solid #555;
+      height: fit-content;
+      color: white;
+    }
+    .edad { color: #e50914; }
+  }
+
+  .info {
+    padding: 20px;
+
+    h3 { margin: 0 0 10px 0; font-size: 1.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .generos { color: #888; font-size: 0.9rem; margin-bottom: 15px; }
+    
+    .btn-comprar {
+      width: 100%;
+      padding: 10px;
+      background-color: #e50914;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s;
+
+      &:hover { background-color: #b20710; }
+    }
+  }
+}
+
+.sin-resultados { text-align: center; color: #888; font-size: 1.2rem; margin-top: 50px; }

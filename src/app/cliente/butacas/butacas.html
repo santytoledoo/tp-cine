@@ -1,0 +1,34 @@
+<div class="butacas-container">
+  <h2>Seleccioná tus butacas</h2>
+  
+  <div class="pantalla">PANTALLA</div>
+
+  <div class="mapa-scroll">
+    <div class="mapa">
+      <div class="fila" *ngFor="let fila of filas">
+        <div class="letra-fila">{{ fila.letra }}</div>
+        
+        <div class="bloques-container">
+          <div class="bloque" *ngFor="let bloque of fila.bloques">
+            <div class="butaca" 
+                 *ngFor="let butaca of bloque"
+                 [ngClass]="[fila.tipo, butaca.estado]"
+                 (click)="seleccionarButaca(butaca, fila.tipo)">
+            </div>
+          </div>
+        </div>
+        
+        <div class="letra-fila">{{ fila.letra }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="leyenda">
+    <div class="item"><div class="butaca normal libre"></div> Estándar</div>
+    <div class="item"><div class="butaca accesible libre"></div> Accesible</div>
+    <div class="item"><div class="butaca vip libre"></div> VIP</div>
+    <div class="item"><div class="butaca seleccionada"></div> Tu Selección</div>
+  </div>
+
+ <button class="btn-continuar" (click)="irAlCandyBar()">Continuar al Candy Bar</button>
+</div>

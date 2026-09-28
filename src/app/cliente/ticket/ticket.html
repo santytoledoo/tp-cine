@@ -1,0 +1,28 @@
+<div class="ticket-container">
+  <div class="ticket-card">
+    <h2>¡Tu Entrada de Cine!</h2>
+    <p>Presenta este código QR en el ingreso de la sala.</p>
+
+    <!-- El QR solo se renderiza si estamos en el navegador y hay datos, evitando errores de SSR -->
+    <div class="qr-wrapper">
+      @if (isBrowser && miTextoParaElQr) {
+        <qrcode 
+          [qrdata]="miTextoParaElQr" 
+          [width]="220" 
+          [errorCorrectionLevel]="'M'">
+        </qrcode>
+      } @else {
+        <p class="loading-qr">Generando código QR...</p>
+      }
+    </div>
+
+    <div class="ticket-info">
+      <p><strong>Función:</strong> Estreno Principal</p>
+      <p><strong>Asiento:</strong> Seleccionado</p>
+    </div>
+
+    <div class="actions">
+      <a routerLink="/home" class="btn-volver">Volver al Inicio</a>
+    </div>
+  </div>
+</div>

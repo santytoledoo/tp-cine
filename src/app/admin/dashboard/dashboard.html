@@ -1,0 +1,45 @@
+<div class="dashboard-container">
+  <h2>Panel de Control</h2>
+  <p>Reportes de ventas y métricas generales del cine.</p>
+
+  <div class="tarjetas-grid">
+    <div class="tarjeta">
+      <div class="icono">💰</div>
+      <div class="info">
+        <h3>Recaudación Total</h3>
+        <p class="numero">${{ totalRecaudado | number:'1.0-0' }}</p>
+      </div>
+    </div>
+    
+    <div class="tarjeta">
+      <div class="icono">🎟️</div>
+      <div class="info">
+        <h3>Entradas Vendidas</h3>
+        <p class="numero">{{ entradasVendidas }}</p>
+      </div>
+    </div>
+    
+    <div class="tarjeta">
+      <div class="icono">🍿</div>
+      <div class="info">
+        <h3>Combos Entregados</h3>
+        <p class="numero">{{ combosVendidos }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="graficos-container">
+    <h3>Películas Más Vistas</h3>
+    <div class="ranking">
+      <div class="item-ranking" *ngFor="let p of peliculasTop">
+        <div class="datos">
+          <span class="titulo">{{ p.titulo }}</span>
+          <span class="ventas">{{ p.ventas }} tickets</span>
+        </div>
+        <div class="barra-fondo">
+          <div class="barra-progreso" [style.width.%]="p.porcentaje"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

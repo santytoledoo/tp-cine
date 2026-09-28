@@ -1,0 +1,28 @@
+<div class="escaner-container">
+  <h2>Control de Accesos (Empleado)</h2>
+  <p>Escaneá el código QR del cliente o ingresalo manualmente.</p>
+  
+  <div class="input-grupo">
+    <input type="text" [(ngModel)]="codigo" (keyup.enter)="validarTicket()" placeholder="Ej: UTN-CINE-987654321" autofocus>
+    <button (click)="validarTicket()">Validar</button>
+  </div>
+
+  <!-- Mensaje de estado -->
+  <p *ngIf="mensaje" class="mensaje" [ngClass]="{'exito': ticketValido, 'error': !ticketValido}">
+    {{ mensaje }}
+  </p>
+
+  <!-- Detalles del ticket si es válido -->
+  <div class="resultado-ticket" *ngIf="ticketValido">
+    <h3>Entrada Válida</h3>
+    <p><strong>Película:</strong> {{ ticketValido.pelicula }}</p>
+    <p><strong>Sala:</strong> {{ ticketValido.sala }}</p>
+    <p><strong>Butacas:</strong> {{ ticketValido.butacas }}</p>
+    
+    <!-- Alerta gigante si el cliente compró comida -->
+    <div class="candy-alert" *ngIf="ticketValido.candybar">
+      <h4>¡ENTREGAR PRODUCTOS DE CANDY BAR!</h4>
+      <p>{{ ticketValido.candybar }}</p>
+    </div>
+  </div>
+</div>
