@@ -1,34 +1,67 @@
-<div class="admin-container">
-  <h2>Cargar Nueva Película</h2>
-  
-  <form [formGroup]="peliculaForm" (ngSubmit)="guardarPelicula()">
-    <div class="form-group"><input type="text" formControlName="titulo" placeholder="Título de la película *"></div>
-    <div class="form-group"><textarea formControlName="sinopsis" placeholder="Sinopsis *" rows="3"></textarea></div>
-    
-    <div class="form-row">
-      <div class="form-group"><input type="number" formControlName="duracion_minutos" placeholder="Duración (min) *"></div>
-      <div class="form-group"><input type="date" formControlName="fecha_estreno" title="Fecha de estreno"></div>
+<div class="peliculas-container">
+  <header class="header-cine">
+    <h1>UTN CINEMAS</h1>
+    <p>Viví la experiencia definitiva.</p>
+
+    <!-- Buscador integrado -->
+    <div class="buscador-box">
+      <input 
+        type="text" 
+        [(ngModel)]="searchTerm" 
+        placeholder="Buscar por película o género (ej. Acción, Comedia)...">
     </div>
+  </header>
 
-    <div class="form-group"><input type="text" formControlName="imagen_url" placeholder="URL del Póster (opcional)"></div>
-    
-    <div class="form-group"><input type="text" formControlName="formatos" placeholder="Formatos (ej: 2D, 3D, 4D)"></div>
-    <div class="form-group"><input type="text" formControlName="idiomas" placeholder="Idiomas (ej: Castellano, Subtitulada)"></div>
-    <div class="form-group"><input type="text" formControlName="generos" placeholder="Géneros (ej: Acción, Comedia)"></div>
-    
-    <div class="form-row">
-      <div class="form-group">
-        <select formControlName="restriccion_edad">
-          <option value="ATP">ATP</option>
-          <option value="+13">+13 (Requiere adulto)</option>
-          <option value="+18">+18 (Requiere adulto)</option>
-        </select>
-      </div>
-      <div class="form-group"><input type="number" formControlName="precio_preventa" placeholder="Precio Preventa ($)"></div>
+  <section class="cartelera">
+    <h2>Cartelera Actual</h2>
+
+    <div class="grid-peliculas">
+      @for (peli of peliculasFiltradas; track peli.id) {
+        <div class="card-peli">
+          <div class="card-header">
+            <span class="badge-restriccion">{{ peli.restriccion }}</span>
+            <span class="duracion">{{ peli.duracion }} min</span>
+          </div>
+
+          <div class="card-body">
+            <h3>{{ peli.nombre }}</h3>
+            <p class="generos-txt">{{ peli.generos.join(', ') }}</p>
+            
+            <!-- Calificación promedio requerida -->
+            <div class="rating-promedio">
+              ⭐ <strong>{{ peli.estrellasPromedio }}</strong> / 5 ({{ peli.reseñas.length }} reseñas)
+            </div>
+
+            <!-- Sección de Reseñas para cumplir con la consigna -->
+            <div class="box-reseñas">
+              <div class="lista-comentarios">
+                @for (res of peli.reseñas; track res.comentario) {
+                  <div class="comentario-item">
+                    <span><strong>{{ res.usuario }}</strong> (⭐{{ res.calificacion }})</span>
+                    <p>{{ res.comentario }}</p>
+                  </div>
+                }
+              </div>
+
+              <div class="form-agregar-reseña">
+                <input type="text" [(ngModel)]="nuevoComentario" placeholder="Deja tu comentario corto...">
+                <select [(ngModel)]="nuevaCalificacion">
+                  <option [value]="5">5 ⭐</option>
+                  <option [value]="4">4 ⭐</option>
+                  <option [value]="3">3 ⭐</option>
+                  <option [value]="2">2 ⭐</option>
+                  <option [value]="1">1 ⭐</option>
+                </select>
+                <button (click)="agregarReseña(peli)">Calificar</button>
+              </div>
+            </div>
+          </div>
+
+          <a routerLink="/butacas" class="btn-funciones">Ver Funciones / Comprar</a>
+        </div>
+      } @empty {
+        <p class="no-results">No se encontraron películas.</p>
+      }
     </div>
-
-    <button type="submit" [disabled]="peliculaForm.invalid">Guardar Película</button>
-  </form>
-
-  <p *ngIf="mensaje" class="mensaje-alerta">{{ mensaje }}</p>
+  </section>
 </div>
