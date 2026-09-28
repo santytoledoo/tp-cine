@@ -11,6 +11,13 @@ interface Butaca {
   estado: 'disponible' | 'seleccionada' | 'ocupada';
 }
 
+interface FilaButacas {
+  letra: string;
+  bloqueIzq: Butaca[];
+  bloqueCen: Butaca[];
+  bloqueDer: Butaca[];
+}
+
 @Component({
   selector: 'app-butacas',
   standalone: true,
@@ -18,33 +25,69 @@ interface Butaca {
   template: `
     <div class="butacas-container">
       <header class="header-butacas">
-        <h2>Seleccion de Butacas</h2>
-        <p>Elige tus asientos para la funcion. Las butacas ocupadas no se pueden seleccionar.</p>
+        <h2>Selección de Butacas</h2>
+        <p>Elige tus asientos. Las butacas adaptadas (filas J y K) y VIP tienen distribuciones especiales.</p>
       </header>
 
       <div class="pantalla-cine">PANTALLA</div>
 
-      <div class="mapa-butacas">
-        @for (filaObj of filas; track filaObj.letra) {
-          <div class="fila-row">
-            <span class="letra-fila">{{ filaObj.letra }}</span>
-            <div class="asientos-grid">
-              @for (butaca of filaObj.asientos; track butaca.id) {
-                <button 
-                  [class]="'asiento ' + butaca.tipo + ' ' + butaca.estado"
-                  [disabled]="butaca.estado === 'ocupada'"
-                  (click)="seleccionarButaca(butaca)"
-                  [title]="butaca.id + ' (' + butaca.tipo + ')'">
-                  {{ butaca.numero }}
-                </button>
-              }
+      <div class="mapa-scroll">
+        <div class="mapa-butacas">
+          @for (filaObj of filas; track filaObj.letra) {
+            <div class="fila-row">
+              <span class="letra-fila">{{ filaObj.letra }}</span>
+              
+              <!-- Bloque Izquierdo -->
+              <div class="bloque">
+                @for (butaca of filaObj.bloqueIzq; track butaca.id) {
+                  <button 
+                    [class]="'asiento ' + butaca.tipo + ' ' + butaca.estado"
+                    [disabled]="butaca.estado === 'ocupada'"
+                    (click)="seleccionarButaca(butaca)"
+                    [title]="'Fila ' + butaca.fila + ' - Asiento ' + butaca.numero + ' (' + butaca.tipo + ')'">
+                    {{ butaca.numero }}
+                  </button>
+                }
+              </div>
+
+              <div class="pasillo"></div>
+
+              <!-- Bloque Central -->
+              <div class="bloque">
+                @for (butaca of filaObj.bloqueCen; track butaca.id) {
+                  <button 
+                    [class]="'asiento ' + butaca.tipo + ' ' + butaca.estado"
+                    [disabled]="butaca.estado === 'ocupada'"
+                    (click)="seleccionarButaca(butaca)"
+                    [title]="'Fila ' + butaca.fila + ' - Asiento ' + butaca.numero + ' (' + butaca.tipo + ')'">
+                    {{ butaca.numero }}
+                  </button>
+                }
+              </div>
+
+              <div class="pasillo"></div>
+
+              <!-- Bloque Derecho -->
+              <div class="bloque">
+                @for (butaca of filaObj.bloqueDer; track butaca.id) {
+                  <button 
+                    [class]="'asiento ' + butaca.tipo + ' ' + butaca.estado"
+                    [disabled]="butaca.estado === 'ocupada'"
+                    (click)="seleccionarButaca(butaca)"
+                    [title]="'Fila ' + butaca.fila + ' - Asiento ' + butaca.numero + ' (' + butaca.tipo + ')'">
+                    {{ butaca.numero }}
+                  </button>
+                }
+              </div>
+
+              <span class="letra-fila">{{ filaObj.letra }}</span>
             </div>
-          </div>
-        }
+          }
+        </div>
       </div>
 
       <div class="leyenda">
-        <div class="item"><span class="asiento disponible"></span> Disponible</div>
+        <div class="item"><span class="asiento disponible"></span> Estándar</div>
         <div class="item"><span class="asiento seleccionada"></span> Seleccionada</div>
         <div class="item"><span class="asiento ocupada"></span> Ocupada</div>
         <div class="item"><span class="asiento vip"></span> VIP (R, S, T)</div>
@@ -55,7 +98,7 @@ interface Butaca {
         <button class="btn-confirmar" [disabled]="asientosSeleccionados.length === 0" (click)="$event.preventDefault(); confirmarCompra()">
           Confirmar Compra ({{ asientosSeleccionados.length }} seleccionadas)
         </button>
-        <a routerLink="/peliculas" class="btn-cancelar">Volver a Peliculas</a>
+        <a routerLink="/peliculas" class="btn-cancelar">Volver a Películas</a>
       </div>
     </div>
   `,
@@ -79,7 +122,7 @@ interface Butaca {
     .pantalla-cine {
       background: linear-gradient(to bottom, #e94560, #1a1a2e);
       width: 80%;
-      max-width: 600px;
+      max-width: 800px;
       height: 30px;
       border-radius: 4px;
       display: flex;
@@ -87,95 +130,111 @@ interface Butaca {
       align-items: center;
       font-weight: bold;
       font-size: 0.8rem;
-      letter-spacing: 2px;
-      margin-bottom: 2rem;
+      letter-spacing: 4px;
+      margin-bottom: 2.5rem;
       box-shadow: 0 5px 15px rgba(233, 69, 96, 0.4);
+    }
+    .mapa-scroll {
+      width: 100%;
+      overflow-x: auto;
+      display: flex;
+      justify-content: center;
     }
     .mapa-butacas {
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
-      max-height: 50vh;
-      overflow-y: auto;
-      padding: 1rem;
+      gap: 0.4rem;
+      padding: 1.5rem;
       background: #141421;
       border-radius: 12px;
       border: 1px solid #2f3542;
       margin-bottom: 1.5rem;
+      min-width: 900px; /* Asegura que no se aplaste en móviles */
     }
     .fila-row {
       display: flex;
       align-items: center;
-      gap: 1rem;
+      justify-content: center;
     }
     .letra-fila {
       font-weight: bold;
-      width: 20px;
+      width: 30px;
       text-align: center;
       color: #e94560;
     }
-    .asientos-grid {
+    .bloque {
       display: flex;
-      gap: 0.3rem;
+      gap: 0.25rem;
+      justify-content: center;
+    }
+    .pasillo {
+      width: 35px; /* Espacio visual para el pasillo de las columnas */
     }
     .asiento {
-      width: 28px;
-      height: 28px;
-      border-radius: 6px;
+      width: 24px;
+      height: 24px;
+      border-radius: 5px 5px 2px 2px;
       border: none;
-      font-size: 0.7rem;
+      font-size: 0.65rem;
       font-weight: bold;
       cursor: pointer;
       display: flex;
       justify-content: center;
       align-items: center;
       background-color: #2ed573;
-      color: white;
-      transition: transform 0.1s;
+      color: #0f0f1a;
+      transition: transform 0.1s, filter 0.2s;
 
       &:hover:not(:disabled) {
-        transform: scale(1.1);
+        transform: scale(1.15);
+        filter: brightness(1.2);
       }
 
       &.seleccionada {
         background-color: #ffa502 !important;
+        color: white;
       }
 
       &.ocupada {
         background-color: #ff4757 !important;
+        color: rgba(255,255,255,0.5);
         cursor: not-allowed;
-        opacity: 0.6;
+        opacity: 0.5;
       }
 
       &.vip {
-        border: 2px solid #fbc531;
+        background-color: #fbc531;
       }
 
       &.discapacidad {
         background-color: #3742fa;
+        color: white;
       }
     }
     .leyenda {
       display: flex;
       gap: 1.5rem;
       font-size: 0.8rem;
-      margin-bottom: 1.5rem;
+      margin-bottom: 2rem;
       flex-wrap: wrap;
       justify-content: center;
+      background: #141421;
+      padding: 10px 20px;
+      border-radius: 8px;
 
       .item {
         display: flex;
         align-items: center;
-        gap: 0.4rem;
+        gap: 0.5rem;
         span {
-          width: 15px;
-          height: 15px;
-          border-radius: 3px;
+          width: 18px;
+          height: 18px;
+          border-radius: 4px;
           display: inline-block;
           &.disponible { background: #2ed573; }
           &.seleccionada { background: #ffa502; }
           &.ocupada { background: #ff4757; }
-          &.vip { background: #2ed573; border: 1px solid #fbc531; }
+          &.vip { background: #fbc531; }
           &.discapacidad { background: #3742fa; }
         }
       }
@@ -188,30 +247,37 @@ interface Butaca {
         background-color: #2ed573;
         color: #1a1a2e;
         border: none;
-        padding: 0.75rem 1.5rem;
+        padding: 0.8rem 1.5rem;
         border-radius: 8px;
         font-weight: bold;
+        font-size: 1rem;
         cursor: pointer;
-        &:disabled { background-color: #57606f; color: #a4b0be; cursor: not-allowed; }
+        &:disabled { background-color: #2f3542; color: #747d8c; cursor: not-allowed; }
+        &:not(:disabled):hover { background-color: #26b360; }
       }
 
       .btn-cancelar {
         background-color: #2f3542;
         color: white;
-        padding: 0.75rem 1.5rem;
+        padding: 0.8rem 1.5rem;
         border-radius: 8px;
         text-decoration: none;
         font-weight: bold;
+        font-size: 1rem;
+        &:hover { background-color: #57606f; }
       }
     }
   `]
 })
 export class ButacasComponent implements OnInit {
-  filas: { letra: string; asientos: Butaca[] }[] = [];
+  filas: FilaButacas[] = [];
   letrasFilas: string[] = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T'];
   isBrowser: boolean;
 
-  constructor(@Inject(PLATFORM_ID) private platformId: Object) {
+  constructor(
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private router: Router
+  ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
   }
 
@@ -222,35 +288,49 @@ export class ButacasComponent implements OnInit {
   inicializarAsientos() {
     let ocupadasGuardadas: string[] = [];
     
-    // Solo leemos de localStorage si estamos en el navegador para evitar errores de SSR
     if (this.isBrowser) {
       ocupadasGuardadas = JSON.parse(localStorage.getItem('butacas_ocupadas') || '[]');
     }
 
     this.filas = this.letrasFilas.map(letra => {
       let tipoAsiento: 'normal' | 'discapacidad' | 'vip' = 'normal';
+      
+      // Lógica de cantidades por defecto (4 - 20 - 4)
+      let cantIzq = 4, cantCen = 20, cantDer = 4;
 
       if (letra === 'J' || letra === 'K') {
         tipoAsiento = 'discapacidad';
+        // Lógica para butacas accesibles (2 - 10 - 2)
+        cantIzq = 2; cantCen = 10; cantDer = 2;
       } else if (letra === 'R' || letra === 'S' || letra === 'T') {
         tipoAsiento = 'vip';
       }
 
-      const asientosFila: Butaca[] = [];
-      for (let i = 1; i <= 14; i++) {
-        const idAsiento = `${letra}${i}`;
-        const estaOcupada = ocupadasGuardadas.includes(idAsiento);
+      // Función helper para generar los bloques de asientos
+      const generarBloque = (inicio: number, cantidad: number) => {
+        const bloque: Butaca[] = [];
+        for (let i = 0; i < cantidad; i++) {
+          const numeroButaca = inicio + i;
+          const idAsiento = `${letra}${numeroButaca}`;
+          const estaOcupada = ocupadasGuardadas.includes(idAsiento);
 
-        asientosFila.push({
-          id: idAsiento,
-          fila: letra,
-          numero: i,
-          tipo: tipoAsiento,
-          estado: estaOcupada ? 'ocupada' : 'disponible'
-        });
-      }
+          bloque.push({
+            id: idAsiento,
+            fila: letra,
+            numero: numeroButaca,
+            tipo: tipoAsiento,
+            estado: estaOcupada ? 'ocupada' : 'disponible'
+          });
+        }
+        return bloque;
+      };
 
-      return { letra, asientos: asientosFila };
+      return { 
+        letra, 
+        bloqueIzq: generarBloque(1, cantIzq),
+        bloqueCen: generarBloque(1 + cantIzq, cantCen),
+        bloqueDer: generarBloque(1 + cantIzq + cantCen, cantDer)
+      };
     });
   }
 
@@ -258,6 +338,11 @@ export class ButacasComponent implements OnInit {
     if (butaca.estado === 'ocupada') return;
     
     if (butaca.estado === 'disponible') {
+      // Advertencia para butaca VIP
+      if (butaca.tipo === 'vip') {
+        const confirmar = confirm('Estás seleccionando una Butaca VIP. Estas butacas tienen un precio superior. ¿Deseas continuar?');
+        if (!confirmar) return;
+      }
       butaca.estado = 'seleccionada';
     } else if (butaca.estado === 'seleccionada') {
       butaca.estado = 'disponible';
@@ -267,11 +352,9 @@ export class ButacasComponent implements OnInit {
   get asientosSeleccionados(): Butaca[] {
     const seleccionados: Butaca[] = [];
     this.filas.forEach(f => {
-      f.asientos.forEach(a => {
-        if (a.estado === 'seleccionada') {
-          seleccionados.push(a);
-        }
-      });
+      seleccionados.push(...f.bloqueIzq.filter(b => b.estado === 'seleccionada'));
+      seleccionados.push(...f.bloqueCen.filter(b => b.estado === 'seleccionada'));
+      seleccionados.push(...f.bloqueDer.filter(b => b.estado === 'seleccionada'));
     });
     return seleccionados;
   }
@@ -287,7 +370,7 @@ export class ButacasComponent implements OnInit {
       localStorage.setItem('butacas_ocupadas', JSON.stringify(actualizadas));
     }
 
-    alert(`¡Compra confirmada con éxito! Has adquirido ${seleccionados.length} butacas.`);
-    window.location.href = '/ticket';
+    // Redirige al candy bar como dice el flujo original
+    this.router.navigate(['/candybar']);
   }
 }
