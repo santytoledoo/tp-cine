@@ -2,6 +2,7 @@ import { Component, OnInit, PLATFORM_ID, Inject } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { QRCodeComponent } from 'angularx-qrcode';
+import { SupabaseService } from '../../core/services/supabase';
 
 @Component({
   selector: 'app-ticket',
@@ -27,18 +28,27 @@ import { QRCodeComponent } from 'angularx-qrcode';
                 [errorCorrectionLevel]="'M'">
               </qrcode>
             } @else {
-              <p class="loading-qr">Generando código QR...</p>
+              <p class="loading-qr">{{ mensajeCarga }}</p>
             }
           </div>
 
           <div class="ticket-info">
-            <div class="info-row">
-              <span>Funcion:</span>
-              <strong>Estreno Principal (2D)</strong>
+            <!-- AQUÍ MOSTRAMOS EL CÓDIGO VISIBLEMENTE -->
+            <div class="info-row codigo-row">
+              <span>Código:</span>
+              <strong class="codigo-texto">{{ miTextoParaElQr }}</strong>
             </div>
             <div class="info-row">
-              <span>Asiento:</span>
-              <strong>Seleccionado (VIP)</strong>
+              <span>Función:</span>
+              <strong>{{ detalleFuncion.pelicula }}</strong>
+            </div>
+            <div class="info-row">
+              <span>Sala:</span>
+              <strong>{{ detalleFuncion.sala }}</strong>
+            </div>
+            <div class="info-row">
+              <span>Asientos:</span>
+              <strong>{{ detalleFuncion.butacas }}</strong>
             </div>
           </div>
         </div>
@@ -157,6 +167,19 @@ import { QRCodeComponent } from 'angularx-qrcode';
           strong {
             color: #ffffff;
           }
+
+          &.codigo-row {
+            border-bottom: 1px dashed #2f3542;
+            padding-bottom: 0.5rem;
+            margin-bottom: 0.2rem;
+
+            .codigo-texto {
+              color: #fbc531;
+              font-family: monospace;
+              font-size: 0.95rem;
+              letter-spacing: 0.5px;
+            }
+          }
         }
       }
     }
@@ -186,12 +209,44 @@ import { QRCodeComponent } from 'angularx-qrcode';
 export class TicketComponent implements OnInit {
   isBrowser: boolean;
   miTextoParaElQr: string = '';
+  mensajeCarga: string = 'Generando código QR...';
+  
+  detalleFuncion = {
+    pelicula: 'Deadpool & Wolverine',
+    sala: 'Sala 1',
+    butacas: 'J5, J6'
+  };
 
-  constructor(@Inject(PLATFORM_ID) private platformId: Object) {
+  constructor(
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private supabase: SupabaseService
+  ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
   }
 
-  ngOnInit() {
-    this.miTextoParaElQr = "Reserva-Cine-UTN-2026";
+  async ngOnInit() {
+    if (this.isBrowser) {
+      // Generamos un código QR único aleatorio
+      const codigoUnico = 'UTN-CINE-' + Math.random().toString(36).substring(2, 10).toUpperCase();
+      this.miTextoParaElQr = codigoUnico;
+
+      // Guardamos la entrada en Supabase con estado 'activa'
+      try {
+        const { error } = await this.supabase.client.from('entradas').insert({
+          codigo_qr: codigoUnico,
+          pelicula: this.detalleFuncion.pelicula,
+          sala: this.detalleFuncion.sala,
+          butacas: this.detalleFuncion.butacas,
+          candybar: '1x Combo Mega (Pochoclo + 2 Bebidas)',
+          estado: 'activa'
+        });
+
+        if (error) {
+          console.error('Error al registrar entrada en BD:', error.message);
+        }
+      } catch (err) {
+        console.error('Excepción al conectar con Supabase:', err);
+      }
+    }
   }
 }

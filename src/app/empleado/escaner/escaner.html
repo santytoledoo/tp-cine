@@ -3,8 +3,17 @@
   <p>Escaneá el código QR del cliente o ingresalo manualmente.</p>
   
   <div class="input-grupo">
-    <input type="text" [(ngModel)]="codigo" (keyup.enter)="validarTicket()" placeholder="Ej: UTN-CINE-987654321" autofocus>
-    <button (click)="validarTicket()">Validar</button>
+    <input 
+      type="text" 
+      [(ngModel)]="codigo" 
+      (keyup.enter)="validarTicket()" 
+      [disabled]="cargando"
+      placeholder="Ej: UTN-CINE-987654321" 
+      autofocus>
+    
+    <button (click)="validarTicket()" [disabled]="cargando">
+      {{ cargando ? 'Validando...' : 'Validar' }}
+    </button>
   </div>
 
   <!-- Mensaje de estado -->
