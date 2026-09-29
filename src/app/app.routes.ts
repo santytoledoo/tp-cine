@@ -9,27 +9,36 @@ import { ButacasComponent } from './cliente/butacas/butacas';
 import { CandybarComponent } from './cliente/candybar/candybar';
 import { TicketComponent } from './cliente/ticket/ticket';
 import { MisPeliculasComponent } from './cliente/mis-peliculas/mis-peliculas';
+import { PerfilComponent } from './cliente/perfil/perfil';
 import { EscanerComponent } from './empleado/escaner/escaner';
+import { ClientLayoutComponent } from './cliente/client-layout/client-layout';
 
 export const routes: Routes = [
-  // Rutas de autenticación
+  // 1. Rutas de Autenticación
   { path: 'registro', component: RegistroComponent },
   { path: 'login', component: LoginComponent },
 
-  // Rutas de administración (Acá está la que necesitás)
+  // 2. Rutas de Administración y Empleados (independientes)
   { path: 'admin/peliculas', component: PeliculasComponent },
   { path: 'admin/funciones', component: FuncionesComponent },
   { path: 'admin/dashboard', component: DashboardComponent },
-
-  // Rutas de clientes
-  { path: 'home', component: HomeComponent },
-  { path: 'butacas', component: ButacasComponent },
-  { path: 'candybar', component: CandybarComponent },
-  { path: 'mis-peliculas', component: MisPeliculasComponent },
-  { path: 'ticket', component: TicketComponent },
   { path: 'escaner', component: EscanerComponent },
 
-  // Redirecciones por defecto
-  { path: '', redirectTo: 'home', pathMatch: 'full' },
+  // 3. Rutas de Clientes (agrupadas con la barra de navegación superior)
+  {
+    path: '',
+    component: ClientLayoutComponent,
+    children: [
+      { path: 'home', component: HomeComponent },
+      { path: 'butacas', component: ButacasComponent },
+      { path: 'candybar', component: CandybarComponent },
+      { path: 'mis-peliculas', component: MisPeliculasComponent },
+      { path: 'ticket', component: TicketComponent },
+      { path: 'perfil', component: PerfilComponent },
+      { path: '', redirectTo: 'home', pathMatch: 'full' }
+    ]
+  },
+
+  // 4. Ruta Comodín (SIEMPRE debe ir al final de todo)
   { path: '**', redirectTo: 'home' }
 ];
