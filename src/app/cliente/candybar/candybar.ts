@@ -28,6 +28,38 @@ export class CandybarComponent {
   }
 
   finalizarCompra() {
+    if (typeof window !== 'undefined') {
+      const ticketParcial = JSON.parse(localStorage.getItem('ticket_parcial') || '{}');
+      
+      let descripcionCandy = 'Sin productos de Candy Bar';
+
+      if (this.carrito.length > 0) {
+        // Agrupar y contar cuántas veces se pidió cada producto
+        const conteo: { [nombre: string]: number } = {};
+        for (const item of this.carrito) {
+          conteo[item.nombre] = (conteo[item.nombre] || 0) + 1;
+        }
+
+        // Formatear el texto (ej: "Pochoclo Grande x2", "Gaseosa Grande")
+        const itemsAgrupados = Object.keys(conteo).map(nombre => {
+          const cantidad = conteo[nombre];
+          return cantidad > 1 ? `${nombre} x${cantidad}` : nombre;
+        });
+
+        descripcionCandy = itemsAgrupados.join(', ');
+      }
+
+      // Combinar con los datos de la función para el ticket
+      const ticketFinal = {
+        pelicula: ticketParcial.pelicula || 'Película General',
+        sala: ticketParcial.sala || 'Sala 1',
+        butacas: ticketParcial.butacas || 'Sin asientos',
+        candybar: descripcionCandy
+      };
+
+      localStorage.setItem('ticket_final', JSON.stringify(ticketFinal));
+    }
+
     this.router.navigate(['/ticket']);
   }
 }

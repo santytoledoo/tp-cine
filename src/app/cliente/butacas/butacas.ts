@@ -1,6 +1,6 @@
 import { Component, OnInit, PLATFORM_ID, Inject } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CuponService } from '../../core/services/cupon';
 
@@ -27,12 +27,11 @@ interface FilaButacas {
     <div class="butacas-container">
       <header class="header-butacas">
         <h2>Selección de Butacas</h2>
-        <p>Elige tus asientos. Las butacas adaptadas (filas J y K) y VIP (R, S, T) tienen condiciones especiales[cite: 9].</p>
+        <p>Elige tus asientos para la función seleccionada.</p>
       </header>
 
-      <!-- AVISO DE RESTRICCIÓN DE EDAD ACTIVA -->
       <div class="aviso-pelicula-info">
-        <p>Película seleccionada: <strong>{{ peliculaActual.nombre }}</strong> (Restricción: <span class="badge-res">{{ peliculaActual.restriccion }}</span>)</p>
+        <p>Película actual: <strong>{{ nombrePelicula }}</strong></p>
       </div>
 
       <div class="pantalla-cine">PANTALLA</div>
@@ -50,7 +49,7 @@ interface FilaButacas {
                     [class]="'asiento ' + butaca.tipo + ' ' + butaca.estado"
                     [disabled]="butaca.estado === 'ocupada'"
                     (click)="seleccionarButaca(butaca)"
-                    [title]="'Fila ' + butaca.fila + ' - Asiento ' + butaca.numero + ' (' + butaca.tipo + ')'">
+                    [title]="'Fila ' + butaca.fila + ' - Asiento ' + butaca.numero">
                     {{ butaca.numero }}
                   </button>
                 }
@@ -65,7 +64,7 @@ interface FilaButacas {
                     [class]="'asiento ' + butaca.tipo + ' ' + butaca.estado"
                     [disabled]="butaca.estado === 'ocupada'"
                     (click)="seleccionarButaca(butaca)"
-                    [title]="'Fila ' + butaca.fila + ' - Asiento ' + butaca.numero + ' (' + butaca.tipo + ')'">
+                    [title]="'Fila ' + butaca.fila + ' - Asiento ' + butaca.numero">
                     {{ butaca.numero }}
                   </button>
                 }
@@ -80,7 +79,7 @@ interface FilaButacas {
                     [class]="'asiento ' + butaca.tipo + ' ' + butaca.estado"
                     [disabled]="butaca.estado === 'ocupada'"
                     (click)="seleccionarButaca(butaca)"
-                    [title]="'Fila ' + butaca.fila + ' - Asiento ' + butaca.numero + ' (' + butaca.tipo + ')'">
+                    [title]="'Fila ' + butaca.fila + ' - Asiento ' + butaca.numero">
                     {{ butaca.numero }}
                   </button>
                 }
@@ -104,7 +103,7 @@ interface FilaButacas {
         <button class="btn-confirmar" [disabled]="asientosSeleccionados.length === 0" (click)="$event.preventDefault(); confirmarCompra()">
           Confirmar Compra ({{ asientosSeleccionados.length }} seleccionadas)
         </button>
-        <a routerLink="/peliculas" class="btn-cancelar">Volver a Películas</a>
+        <a routerLink="/home" class="btn-cancelar">Volver al Inicio</a>
       </div>
     </div>
   `,
@@ -119,7 +118,6 @@ interface FilaButacas {
     }
     .aviso-pelicula-info {
       background: #1a1a2e; border: 1px solid #2f3542; padding: 10px 20px; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.95rem; color: #dcdde1;
-      .badge-res { background: #e94560; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
     }
     .pantalla-cine {
       background: linear-gradient(to bottom, #e94560, #1a1a2e); width: 80%; max-width: 800px; height: 30px; border-radius: 4px; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 0.8rem; letter-spacing: 4px; margin-bottom: 2rem; box-shadow: 0 5px 15px rgba(233, 69, 96, 0.4);
@@ -168,32 +166,35 @@ export class ButacasComponent implements OnInit {
   filas: FilaButacas[] = [];
   letrasFilas: string[] = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T'];
   isBrowser: boolean;
-
-  // Simulamos datos de la película actual y la edad del usuario logueado para cumplir la regla
-  peliculaActual = {
-    nombre: 'Deadpool & Wolverine',
-    restriccion: '+18' // Cambia a '+13' o 'ATP' para probar
-  };
-  
-  edadUsuarioLogueado: number = 20; // Cambia a 16 o 12 para probar los bloqueos
+  peliculaId: string = '1';
+  nombrePelicula: string = 'Deadpool & Wolverine';
 
   constructor(
     @Inject(PLATFORM_ID) private platformId: Object,
     private router: Router,
-    private cuponService: CuponService
+    private route: ActivatedRoute
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
   }
 
   ngOnInit() {
-    this.inicializarAsientos();
+    this.route.queryParams.subscribe(params => {
+      if (params['pelicula']) {
+        this.peliculaId = params['pelicula'];
+      }
+      if (params['nombre']) {
+        this.nombrePelicula = params['nombre'];
+      }
+      this.inicializarAsientos();
+    });
   }
 
   inicializarAsientos() {
     let ocupadasGuardadas: string[] = [];
+    const storageKey = `butacas_ocupadas_pelicula_${this.peliculaId}`;
     
     if (this.isBrowser) {
-      ocupadasGuardadas = JSON.parse(localStorage.getItem('butacas_ocupadas') || '[]');
+      ocupadasGuardadas = JSON.parse(localStorage.getItem(storageKey) || '[]');
     }
 
     this.filas = this.letrasFilas.map(letra => {
@@ -239,7 +240,7 @@ export class ButacasComponent implements OnInit {
     
     if (butaca.estado === 'disponible') {
       if (butaca.tipo === 'vip') {
-        const confirmar = confirm('Estás seleccionando una Butaca VIP. Estas butacas tienen un precio superior[cite: 9]. ¿Deseas continuar?');
+        const confirmar = confirm('Esta es una butaca VIP. ¿Deseas continuar?');
         if (!confirmar) return;
       }
       butaca.estado = 'seleccionada';
@@ -262,28 +263,23 @@ export class ButacasComponent implements OnInit {
     const seleccionados = this.asientosSeleccionados;
     if (seleccionados.length === 0) return;
 
-    // VALIDACIÓN DE RESTRICCIÓN DE EDAD EXIGIDA POR EL CLIENTE
-    const validacionEdad = this.cuponService.validarRestriccionEdad(
-      this.peliculaActual.restriccion, 
-      this.edadUsuarioLogueado
-    );
-
-    if (!validacionEdad.permitido) {
-      alert(validacionEdad.mensaje); // Bloquea la compra si es menor de edad para +18[cite: 9]
-      return;
-    }
-
-    if (this.peliculaActual.restriccion === '+13' && this.edadUsuarioLogueado < 13) {
-      alert(validacionEdad.mensaje); // Muestra el aviso de adulto responsable para +13[cite: 9]
-    } else if (this.peliculaActual.restriccion === '+13') {
-      alert('Aviso importante: Al tratarse de una película +13, recuerda que debes concurrir con un adulto responsable[cite: 9].');
-    }
-
     if (this.isBrowser) {
-      const ocupadasGuardadas: string[] = JSON.parse(localStorage.getItem('butacas_ocupadas') || '[]');
+      const idsAsientos = seleccionados.map(a => a.id).join(', ');
+      
+      // Guardar datos parciales para el ticket
+      const datosParciales = {
+        pelicula: this.nombrePelicula,
+        sala: `Sala ${this.peliculaId}`, // Sala dinámica basada en la película
+        butacas: idsAsientos
+      };
+      localStorage.setItem('ticket_parcial', JSON.stringify(datosParciales));
+
+      // Marcar butacas como ocupadas en el almacenamiento de esta película
+      const storageKey = `butacas_ocupadas_pelicula_${this.peliculaId}`;
+      const ocupadasGuardadas: string[] = JSON.parse(localStorage.getItem(storageKey) || '[]');
       const nuevosIds = seleccionados.map(a => a.id);
       const actualizadas = [...ocupadasGuardadas, ...nuevosIds];
-      localStorage.setItem('butacas_ocupadas', JSON.stringify(actualizadas));
+      localStorage.setItem(storageKey, JSON.stringify(actualizadas));
     }
 
     this.router.navigate(['/candybar']);

@@ -47,7 +47,6 @@ interface TicketComprado {
             </p>
             <p class="monto-pagado">Pagaste: $ {{ item.montoPagado }}</p>
 
-            <!-- LÓGICA PARA FUNCIONES FINALIZADAS (RESEÑAS) -->
             <div *ngIf="item.estado === 'finalizada'" class="seccion-calificacion">
               <span>Tu Calificación:</span>
               <div class="estrellas-selector">
@@ -60,7 +59,6 @@ interface TicketComprado {
               <p class="comentario-guardado" *ngIf="item.comentario"><em>"{{ item.comentario }}"</em></p>
             </div>
 
-            <!-- LÓGICA PARA FUNCIONES ACTIVAS (CANCELACIÓN) -->
             <div *ngIf="item.estado === 'activa'" class="seccion-acciones">
               <p class="aviso-cancelacion">
                 Podés cancelar hasta 2 horas antes de la función. El dinero se reintegrará como crédito a tu cuenta.
@@ -76,7 +74,6 @@ interface TicketComprado {
               </p>
             </div>
 
-            <!-- LÓGICA PARA FUNCIONES CANCELADAS -->
             <div *ngIf="item.estado === 'cancelada'" class="seccion-cancelada">
               <p>Esta compra fue cancelada y el saldo fue reintegrado a tu billetera.</p>
             </div>
@@ -98,7 +95,6 @@ interface TicketComprado {
       padding: 40px 5%;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
-
     .header-perfil {
       display: flex;
       justify-content: space-between;
@@ -106,11 +102,9 @@ interface TicketComprado {
       margin-bottom: 30px;
       flex-wrap: wrap;
       gap: 20px;
-
       h2 { color: #e94560; font-size: 2.2rem; margin: 0 0 10px 0; }
       .subtitulo { color: #a4b0be; margin: 0; font-size: 1rem; }
     }
-
     .credito-box {
       background-color: #1a1a2e;
       padding: 15px 25px;
@@ -118,13 +112,10 @@ interface TicketComprado {
       border: 1px solid #2ed573;
       text-align: center;
       box-shadow: 0 4px 15px rgba(46, 213, 115, 0.2);
-
       .etiqueta { display: block; font-size: 0.9rem; color: #a4b0be; margin-bottom: 5px; }
       .monto { font-size: 1.8rem; font-weight: bold; color: #2ed573; }
     }
-
     .grilla-historial { display: flex; flex-direction: column; gap: 20px; max-width: 1000px; margin: 0 auto; }
-
     .pelicula-historial-card {
       background-color: #1a1a2e;
       border-radius: 12px;
@@ -132,10 +123,8 @@ interface TicketComprado {
       overflow: hidden;
       border: 1px solid #2f3542;
       transition: transform 0.2s;
-
       &.cancelada { opacity: 0.6; filter: grayscale(100%); }
       &:hover { transform: translateY(-3px); border-color: #e94560; }
-
       .poster-box {
         width: 150px;
         position: relative;
@@ -145,18 +134,15 @@ interface TicketComprado {
           padding: 5px 10px; border-radius: 4px; font-weight: bold; font-size: 0.8rem;
         }
       }
-
       .detalle-box {
         padding: 20px;
         display: flex;
         flex-direction: column;
         justify-content: center;
         flex: 1;
-
         h3 { margin: 0 0 8px 0; font-size: 1.4rem; color: #fff; }
         .fecha-sala { color: #a4b0be; font-size: 1rem; margin-bottom: 5px; }
         .monto-pagado { color: #2ed573; font-weight: bold; font-size: 0.95rem; margin-bottom: 15px; }
-
         .seccion-calificacion {
           display: flex; align-items: center; gap: 10px; font-size: 0.9rem; color: #bbb; flex-wrap: wrap;
           .estrellas-selector span {
@@ -165,7 +151,6 @@ interface TicketComprado {
           }
           .comentario-guardado { width: 100%; color: #888; margin: 5px 0 0 0; }
         }
-
         .seccion-acciones {
           background: #141421; padding: 15px; border-radius: 8px; border: 1px dashed #2f3542;
           .aviso-cancelacion { font-size: 0.85rem; color: #a4b0be; margin: 0 0 10px 0; }
@@ -176,20 +161,15 @@ interface TicketComprado {
           }
           .error-tiempo { color: #ff4757; font-size: 0.85rem; margin: 10px 0 0 0; font-weight: bold; }
         }
-
         .seccion-cancelada { color: #ff4757; font-weight: bold; font-size: 0.95rem; }
       }
     }
-
     .sin-historial { text-align: center; color: #777; font-size: 1.2rem; margin-top: 50px; }
   `]
 })
 export class MisPeliculasComponent implements OnInit {
   miCreditoFavor: number = 4500; 
-
-  // Simulamos la fecha actual en vivo
   hoy: Date = new Date();
-
   historialPeliculas: TicketComprado[] = [];
 
   constructor() {}
@@ -199,22 +179,17 @@ export class MisPeliculasComponent implements OnInit {
   }
 
   cargarDatosMocheados() {
-    // 1. Una película del pasado (Ya se vio, se puede calificar)
-    const fechaPasada = new Date(this.hoy.getTime() - (10 * 24 * 60 * 60 * 1000)); // Hace 10 días
-
-    // 2. Una película que empieza en 5 horas (Se puede cancelar)
+    const fechaPasada = new Date(this.hoy.getTime() - (10 * 24 * 60 * 60 * 1000));
     const fechaFuturaLejana = new Date(this.hoy.getTime() + (5 * 60 * 60 * 1000));
-
-    // 3. Una película que empieza en 1 hora (Bloqueada, no se puede cancelar)
     const fechaFuturaCercana = new Date(this.hoy.getTime() + (1 * 60 * 60 * 1000));
 
     this.historialPeliculas = [
       {
         id: 101,
-        titulo: 'Avatar: Fuego y Cenizas',
+        titulo: 'Dune: Parte Dos',
         fechaFuncion: fechaFuturaLejana,
-        sala: 'Sala VIP 1',
-        poster: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=200',
+        sala: 'Sala VIP 2',
+        poster: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?q=80&w=200',
         calificacionUsuario: 0,
         comentario: '',
         estado: 'activa',
@@ -222,10 +197,10 @@ export class MisPeliculasComponent implements OnInit {
       },
       {
         id: 102,
-        titulo: 'Misión Imposible 8',
+        titulo: 'Intensa Mente 2',
         fechaFuncion: fechaFuturaCercana,
-        sala: 'Sala 4',
-        poster: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=200',
+        sala: 'Sala 3',
+        poster: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?q=80&w=200',
         calificacionUsuario: 0,
         comentario: '',
         estado: 'activa',
@@ -235,8 +210,8 @@ export class MisPeliculasComponent implements OnInit {
         id: 103,
         titulo: 'Deadpool & Wolverine',
         fechaFuncion: fechaPasada,
-        sala: 'Sala 2',
-        poster: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=200',
+        sala: 'Sala 1',
+        poster: 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=200',
         calificacionUsuario: 5,
         comentario: '¡Increíble, la mejor del año!',
         estado: 'finalizada',
@@ -245,7 +220,6 @@ export class MisPeliculasComponent implements OnInit {
     ];
   }
 
-  // Lógica principal: Verifica si faltan más de 2 horas (120 minutos)
   puedeCancelar(fechaFuncion: Date): boolean {
     const msDiferencia = fechaFuncion.getTime() - new Date().getTime();
     const horasDiferencia = msDiferencia / (1000 * 60 * 60);
@@ -262,7 +236,6 @@ export class MisPeliculasComponent implements OnInit {
     
     if (confirmacion) {
       ticket.estado = 'cancelada';
-      // Sumamos el dinero devuelto al crédito del usuario
       this.miCreditoFavor += ticket.montoPagado;
       alert(`¡Cancelación exitosa! Tu nuevo crédito a favor es de $ ${this.miCreditoFavor}`);
     }

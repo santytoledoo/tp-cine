@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { SupabaseService } from '../../core/services/supabase';
 
 @Component({
   selector: 'app-registro',
@@ -14,7 +15,11 @@ export class RegistroComponent {
   registroForm: FormGroup;
   mensajeExito: string = '';
 
-  constructor(private fb: FormBuilder, private router: Router) {
+  constructor(
+    private fb: FormBuilder, 
+    private router: Router,
+    private supabase: SupabaseService
+  ) {
     this.registroForm = this.fb.group({
       nombre: ['', Validators.required],
       apellido: ['', Validators.required],
@@ -27,15 +32,43 @@ export class RegistroComponent {
     });
   }
 
-  onSubmit() {
+  async onSubmit() {
     if (this.registroForm.valid) {
-      console.log('Datos de registro:', this.registroForm.value);
-      // Aquí guardarías los datos en Supabase y aplicarías el cupón del 20% de descuento en primera compra
-      this.mensajeExito = '¡Registro exitoso! Se aplicó tu cupón de 20% de descuento para tu primera compra.';
-      
-      setTimeout(() => {
-        this.router.navigate(['/login']);
-      }, 2500);
+      const datos = this.registroForm.value;
+      try {
+        // 1. Crear usuario real en Supabase Auth
+        const { data, error } = await this.supabase.client.auth.signUp({
+          email: datos.email,
+          password: datos.password,
+        });
+
+        if (error) throw error;
+
+        // 2. Intentar guardar datos adicionales en la tabla perfiles de forma segura
+        if (data.user) {
+          try {
+            await this.supabase.client.from('perfiles').insert({
+              id: data.user.id,
+              nombre: datos.nombre,
+              apellido: datos.apellido,
+              fecha_nacimiento: datos.fechaNacimiento,
+              tipo_sangre: datos.tipoSangre,
+              color_ojos: datos.colorOjos,
+              dias_vacaciones: datos.diasVacaciones
+            });
+          } catch (profileErr) {
+            console.warn('Tabla perfiles no creada aún, omitiendo guardado extra.');
+          }
+        }
+
+        this.mensajeExito = '¡Registro exitoso! Cuenta creada correctamente. Redirigiendo...';
+        
+        setTimeout(() => {
+          this.router.navigate(['/login']);
+        }, 2500);
+      } catch (err: any) {
+        alert('Error al registrarse: ' + err.message);
+      }
     } else {
       this.registroForm.markAllAsTouched();
     }

@@ -40,7 +40,7 @@ interface PeliculaHome {
               <div class="card-content">
                 <h3>{{ peli.nombre }}</h3>
                 <p class="genero">{{ peli.genero }} • {{ peli.duracion }}</p>
-                <a routerLink="/butacas" class="btn-comprar">Comprar Entradas</a>
+                <a [routerLink]="['/butacas']" [queryParams]="{ pelicula: peli.id, nombre: peli.nombre }" class="btn-comprar">Comprar Entradas</a>
               </div>
             </div>
           }
@@ -155,7 +155,7 @@ interface PeliculaHome {
             width: 100%;
             height: 280px;
             background-color: #141421;
-            overflow: display;
+            overflow: hidden;
 
             img {
               width: 100%;
@@ -202,14 +202,14 @@ interface PeliculaHome {
   `]
 })
 export class HomeComponent {
-  // Top 3 de películas más vendidas con imágenes de alta calidad (URLs públicas y seguras)
   topPeliculas: PeliculaHome[] = [
     {
       id: 1,
       nombre: 'Deadpool & Wolverine',
       genero: 'Acción / Comedia',
       duracion: '127 min',
-      imagen: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=600&auto=format&fit=crop',
+      // Imagen temática de acción / estética roja y oscura
+      imagen: 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=600&auto=format&fit=crop',
       ventas: 1540
     },
     {
@@ -217,7 +217,8 @@ export class HomeComponent {
       nombre: 'Dune: Parte Dos',
       genero: 'Ciencia Ficción / Aventura',
       duracion: '166 min',
-      imagen: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=600&auto=format&fit=crop',
+      // Imagen temática de desierto / ciencia ficción
+      imagen: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?q=80&w=600&auto=format&fit=crop',
       ventas: 1420
     },
     {
@@ -225,13 +226,13 @@ export class HomeComponent {
       nombre: 'Intensa Mente 2',
       genero: 'Animación / Familiar',
       duracion: '96 min',
-      imagen: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=600&auto=format&fit=crop',
+      // Imagen temática colorida / expresiva
+      imagen: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?q=80&w=600&auto=format&fit=crop',
       ventas: 1280
     }
   ];
 
   onImgError(event: any) {
-    // Imagen de respaldo por si falla la red
     event.target.src = 'https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=600&auto=format&fit=crop';
   }
 }

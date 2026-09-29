@@ -37,31 +37,26 @@ export class EscanerComponent {
         .eq('codigo_qr', codigoBusqueda)
         .maybeSingle();
 
-      this.ngZone.run(() => {
-        if (error) {
+      if (error) {
+        this.ngZone.run(() => {
           this.mensaje = 'Error al consultar la base de datos: ' + error.message;
-          this.cargando = false;
-          return;
-        }
+        });
+        return;
+      }
 
-        if (!data) {
+      if (!data) {
+        this.ngZone.run(() => {
           this.mensaje = `Error: El código "${codigoBusqueda}" no existe o es inválido.`;
-          this.ticketValido = null;
-          this.cargando = false;
-          return;
-        }
+        });
+        return;
+      }
 
-        // 2. Validar si el ticket ya fue utilizado
-        if (data.estado !== 'activa') {
+      // 2. Validar si el ticket ya fue utilizado
+      if (data.estado !== 'activa') {
+        this.ngZone.run(() => {
           this.mensaje = `⚠️ Atención: Este ticket ya fue ${data.estado} anteriormente.`;
-          this.ticketValido = null;
-          this.cargando = false;
-          return;
-        }
-      });
-
-      if (error || !data || data.estado !== 'activa') {
-        return; // Si hubo error o no está activo, cortamos acá
+        });
+        return;
       }
 
       // 3. Marcar el ticket como 'utilizada' en Supabase (INVALIDACIÓN DEL QR)
@@ -70,14 +65,15 @@ export class EscanerComponent {
         .update({ estado: 'utilizada' })
         .eq('codigo_qr', codigoBusqueda);
 
-      this.ngZone.run(() => {
-        if (updateError) {
-          this.mensaje = 'Error al actualizar el estado del ticket.';
-          this.cargando = false;
-          return;
-        }
+      if (updateError) {
+        this.ngZone.run(() => {
+          this.mensaje = 'Error al actualizar el estado del ticket: ' + updateError.message;
+        });
+        return;
+      }
 
-        // 4. Éxito total
+      // 4. Éxito total: Entrada válida e invalidada correctamente
+      this.ngZone.run(() => {
         this.mensaje = '¡Acceso Permitido! Entrada validada correctamente.';
         this.ticketValido = {
           pelicula: data.pelicula,
@@ -85,14 +81,17 @@ export class EscanerComponent {
           butacas: data.butacas,
           candybar: data.candybar
         };
-        this.cargando = false;
-        this.codigo = ''; // Limpiamos el input
+        this.codigo = ''; // Limpiamos el input para el siguiente escaneo
       });
 
     } catch (err: any) {
       this.ngZone.run(() => {
         this.mensaje = 'Error inesperado: ' + (err.message || err);
         this.ticketValido = null;
+      });
+    } finally {
+      // Garantiza que la pantalla de carga siempre se desactive
+      this.ngZone.run(() => {
         this.cargando = false;
       });
     }

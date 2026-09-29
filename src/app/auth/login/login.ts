@@ -39,8 +39,11 @@ export class LoginComponent {
 
       if (error) throw error;
 
-      this.mensaje = '¡Ingreso exitoso!';
-      // Más adelante acá pondremos la redirección al Home o al Panel de Admin
+      this.mensaje = '¡Ingreso exitoso! Redirigiendo...';
+      
+      setTimeout(() => {
+        this.router.navigate(['/home']);
+      }, 1000);
       
     } catch (error: any) {
       this.mensaje = 'Error al iniciar sesión: ' + error.message;
