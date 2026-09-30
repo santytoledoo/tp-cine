@@ -18,7 +18,6 @@ interface Pelicula {
   restriccion: string;
   estrellasPromedio: number;
   resenas: Resena[];
-  // Nuevos requerimientos agregados
   formato: string; 
   idioma: string;
   fechaEstreno: Date;
@@ -36,11 +35,22 @@ interface Pelicula {
         <h1>UTN CINEMAS</h1>
         <p>Viví la experiencia definitiva.</p>
         
-        <div class="buscador-box">
+        <!-- Buscador y Filtro por Género Integrados -->
+        <div class="buscador-box flex-buscador">
           <input 
             type="text" 
             [(ngModel)]="searchTerm" 
-            placeholder="Buscar por película o género (ej. Acción, Comedia)...">
+            placeholder="Buscar por película o sinopsis...">
+          
+          <select [(ngModel)]="selectedGenero" class="select-genero">
+            <option value="todos">Todos los géneros</option>
+            <option value="Acción">Acción</option>
+            <option value="Comedia">Comedia</option>
+            <option value="Ciencia Ficción">Ciencia Ficción</option>
+            <option value="Animación">Animación</option>
+            <option value="Familiar">Familiar</option>
+            <option value="Thriller">Thriller</option>
+          </select>
         </div>
 
         <!-- Sistema de Pestañas -->
@@ -95,10 +105,10 @@ interface Pelicula {
                   </div>
                 </div>
               </div>
-              <a routerLink="/butacas" class="btn-funciones">Ver Funciones / Comprar</a>
+              <a routerLink="/butacas" [queryParams]="{ pelicula: peli.id, nombre: peli.nombre }" class="btn-funciones">Ver Funciones / Comprar</a>
             </div>
           } @empty {
-            <p class="no-results">No se encontraron películas en cartelera.</p>
+            <p class="no-results">No se encontraron películas en cartelera con esos filtros.</p>
           }
         </div>
       </section>
@@ -122,7 +132,6 @@ interface Pelicula {
                 <p class="generos-txt">{{ peli.generos.join(', ') }}</p>
                 <p class="sinopsis-txt">{{ peli.sinopsis }}</p>
                 
-                <!-- LÓGICA DE PREVENTA O ALERTA -->
                 <div class="estado-estreno">
                   <div *ngIf="esPreventa(peli)" class="preventa-activa">
                     <span class="badge-preventa">¡PREVENTA ABIERTA!</span>
@@ -134,12 +143,11 @@ interface Pelicula {
                 </div>
               </div>
 
-              <!-- BOTON CONDICIONAL -->
-               <a *ngIf="esPreventa(peli)" routerLink="/butacas" class="btn-funciones btn-preventa">Comprar Preventa</a>
+               <a *ngIf="esPreventa(peli)" routerLink="/butacas" [queryParams]="{ pelicula: peli.id, nombre: peli.nombre }" class="btn-funciones btn-preventa">Comprar Preventa</a>
                <button *ngIf="!esPreventa(peli)" (click)="activarAlerta(peli)" class="btn-alerta">🔔 Activar Alerta</button>
             </div>
           } @empty {
-            <p class="no-results">No hay estrenos programados por ahora.</p>
+            <p class="no-results">No hay estrenos programados con esos filtros.</p>
           }
         </div>
       </section>
@@ -150,9 +158,17 @@ interface Pelicula {
     .header-cine { text-align: center; margin-bottom: 3rem; }
     .header-cine h1 { color: #e94560; font-size: 2.5rem; margin-bottom: 0.5rem; }
     .header-cine p { color: #a4b0be; margin-bottom: 1.5rem; }
-    .buscador-box input { width: 100%; max-width: 500px; padding: 0.85rem 1.2rem; border-radius: 30px; border: 1px solid #2f3542; background-color: #1e1e2f; color: white; font-size: 1rem; outline: none; }
     
-    /* Pestañas */
+    .flex-buscador {
+      display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; max-width: 700px; margin: 0 auto;
+      input { flex: 1; min-width: 280px; padding: 0.85rem 1.2rem; border-radius: 30px; border: 1px solid #2f3542; background-color: #1e1e2f; color: white; font-size: 1rem; outline: none; }
+      input:focus { border-color: #e94560; }
+      .select-genero {
+        padding: 0.85rem 1.2rem; border-radius: 30px; border: 1px solid #2f3542; background-color: #1e1e2f; color: white; font-size: 1rem; outline: none; cursor: pointer;
+        &:focus { border-color: #e94560; }
+      }
+    }
+    
     .tabs { display: flex; justify-content: center; gap: 1rem; margin-top: 2rem; }
     .tabs button { background: #1e1e2f; color: white; border: 1px solid #2f3542; padding: 0.8rem 2rem; border-radius: 30px; cursor: pointer; font-weight: bold; font-size: 1rem; transition: 0.2s; }
     .tabs button.activo { background: #e94560; border-color: #e94560; }
@@ -185,8 +201,7 @@ interface Pelicula {
     .form-agregar-resena button { background-color: #e94560; color: white; border: none; padding: 0.3rem 0.6rem; border-radius: 4px; font-size: 0.75rem; cursor: pointer; }
     
     .estado-estreno { margin-top: auto; padding: 10px; background: #141421; border-radius: 8px; text-align: center; }
-    .badge-preventa { background: #ff4757; color: white; padding: 0.3rem 0.6rem; border-radius: 4px; font-size: 0.8rem; font-weight: bold; display: inline-block; margin-bottom: 5px; animation: pulse 1.5s infinite; }
-    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+    .badge-preventa { background: #ff4757; color: white; padding: 0.3rem 0.6rem; border-radius: 4px; font-size: 0.8rem; font-weight: bold; display: inline-block; margin-bottom: 5px; }
     
     .btn-funciones { background-color: #e94560; color: white; text-align: center; padding: 0.85rem; text-decoration: none; font-weight: bold; display: block;}
     .btn-funciones:hover { background-color: #d63031; }
@@ -195,6 +210,7 @@ interface Pelicula {
     
     .btn-alerta { background-color: #fbc531; color: #1a1a2e; border: none; width: 100%; padding: 0.85rem; font-weight: bold; cursor: pointer; font-size: 1rem;}
     .btn-alerta:hover { background-color: #e1b12c; }
+    .no-results { text-align: center; color: #888; grid-column: 1 / -1; font-size: 1.1rem; margin-top: 2rem; }
   `]
 })
 export class PeliculasComponent {
@@ -202,7 +218,6 @@ export class PeliculasComponent {
   searchTerm: string = '';
   selectedGenero: string = 'todos';
   
-  // Usamos la fecha actual como punto de referencia para calcular preventas
   hoy: Date = new Date();
 
   peliculas: Pelicula[] = [
@@ -215,7 +230,7 @@ export class PeliculasComponent {
       restriccion: '+18',
       formato: '3D',
       idioma: 'Subtitulada',
-      fechaEstreno: new Date(new Date().setDate(this.hoy.getDate() - 30)), // Se estrenó hace un mes
+      fechaEstreno: new Date(new Date().setDate(this.hoy.getDate() - 30)),
       precioBase: 6500,
       precioPreventa: 5000,
       estrellasPromedio: 4.8,
@@ -230,7 +245,7 @@ export class PeliculasComponent {
       restriccion: 'ATP',
       formato: '2D',
       idioma: 'Castellano',
-      fechaEstreno: new Date(new Date().setDate(this.hoy.getDate() - 15)), // Se estrenó hace 15 días
+      fechaEstreno: new Date(new Date().setDate(this.hoy.getDate() - 15)),
       precioBase: 5500,
       precioPreventa: 4000,
       estrellasPromedio: 4.2,
@@ -245,7 +260,7 @@ export class PeliculasComponent {
       restriccion: '+13',
       formato: '5D',
       idioma: 'Subtitulada',
-      fechaEstreno: new Date(new Date().setDate(this.hoy.getDate() + 4)), // Faltan 4 días -> ¡PREVENTA ACTIVA!
+      fechaEstreno: new Date(new Date().setDate(this.hoy.getDate() + 4)),
       precioBase: 8000,
       precioPreventa: 6000,
       estrellasPromedio: 0,
@@ -260,7 +275,7 @@ export class PeliculasComponent {
       restriccion: '+13',
       formato: '4D',
       idioma: 'Subtitulada',
-      fechaEstreno: new Date(new Date().setDate(this.hoy.getDate() + 20)), // Faltan 20 días -> ALERTA
+      fechaEstreno: new Date(new Date().setDate(this.hoy.getDate() + 20)),
       precioBase: 7000,
       precioPreventa: 5500,
       estrellasPromedio: 0,
@@ -281,24 +296,21 @@ export class PeliculasComponent {
   }
 
   get peliculasCarteleraFiltradas() {
-    // Entran en cartelera las que ya se estrenaron
     return this.peliculasFiltradas.filter(p => p.fechaEstreno <= this.hoy);
   }
 
   get peliculasProximamenteFiltradas() {
-    // Entran en próximamente las que se estrenan en el futuro
     return this.peliculasFiltradas.filter(p => p.fechaEstreno > this.hoy);
   }
 
   esPreventa(peli: Pelicula): boolean {
     const unDia = 1000 * 60 * 60 * 24;
     const diferenciaDias = (peli.fechaEstreno.getTime() - this.hoy.getTime()) / unDia;
-    // Si faltan 7 días o menos (y la fecha es en el futuro), se habilita la preventa
     return diferenciaDias <= 7 && diferenciaDias > 0;
   }
 
   activarAlerta(peli: Pelicula) {
-    alert(`¡Alerta activada exitosamente! Te notificaremos al mail de tu cuenta cuando falten 7 días para el estreno de "${peli.nombre}" y se habilite la preventa.`);
+    alert(`¡Alerta activada exitosamente! Te notificaremos cuando falten 7 días para el estreno de "${peli.nombre}".`);
   }
 
   agregarResena(peli: Pelicula) {

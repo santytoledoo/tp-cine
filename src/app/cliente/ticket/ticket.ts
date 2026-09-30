@@ -53,6 +53,10 @@ import { SupabaseService } from '../../core/services/supabase';
               <span>Candy Bar:</span>
               <strong>{{ detalleFuncion.candybar }}</strong>
             </div>
+            <div class="info-row" style="border-top: 1px solid #2f3542; padding-top: 5px; margin-top: 5px;">
+              <span>Total Pagado:</span>
+              <strong style="color: #2ed573;">$ {{ detalleFuncion.montoPagado }}</strong>
+            </div>
           </div>
         </div>
 
@@ -113,7 +117,8 @@ export class TicketComponent implements OnInit {
     pelicula: 'Cargando...',
     sala: 'Cargando...',
     butacas: 'Cargando...',
-    candybar: ''
+    candybar: '',
+    montoPagado: 0
   };
 
   constructor(
@@ -125,25 +130,47 @@ export class TicketComponent implements OnInit {
 
   async ngOnInit() {
     if (this.isBrowser) {
-      // Leer los datos reales guardados en el proceso de compra
       const ticketGuardado = localStorage.getItem('ticket_final');
+      let montoReal = 6000;
+
       if (ticketGuardado) {
         const datos = JSON.parse(ticketGuardado);
+        montoReal = datos.montoPagado || 6000;
         this.detalleFuncion = {
           pelicula: datos.pelicula || 'Película General',
           sala: datos.sala || 'Sala 1',
           butacas: datos.butacas || 'Sin asientos',
-          candybar: datos.candybar || 'Ninguno'
+          candybar: datos.candybar || 'Ninguno',
+          montoPagado: montoReal
         };
+
+        // Guardar en el historial de "Mis Películas" con el monto real pagado
+        const historial = JSON.parse(localStorage.getItem('historial_compras') || '[]');
+        const yaExiste = historial.some((h: any) => h.butacas === datos.butacas && h.titulo === datos.pelicula);
+        
+        if (!yaExiste) {
+          historial.unshift({
+            id: Date.now(),
+            titulo: datos.pelicula,
+            fechaFuncion: new Date(new Date().getTime() + 6 * 60 * 60 * 1000).toISOString(),
+            sala: datos.sala,
+            butacas: datos.butacas,
+            candybar: datos.candybar,
+            poster: 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=200',
+            calificacionUsuario: 0,
+            comentario: '',
+            estado: 'activa',
+            montoPagado: montoReal
+          });
+          localStorage.setItem('historial_compras', JSON.stringify(historial));
+        }
       }
 
-      // Generar código QR único
       const codigoUnico = 'UTN-CINE-' + Math.random().toString(36).substring(2, 10).toUpperCase();
       this.miTextoParaElQr = codigoUnico;
 
-      // Registrar en Supabase con la información adaptada
       try {
-        const { error } = await this.supabase.client.from('entradas').insert({
+        await this.supabase.client.from('entradas').insert({
           codigo_qr: codigoUnico,
           pelicula: this.detalleFuncion.pelicula,
           sala: this.detalleFuncion.sala,
@@ -151,10 +178,6 @@ export class TicketComponent implements OnInit {
           candybar: this.detalleFuncion.candybar,
           estado: 'activa'
         });
-
-        if (error) {
-          console.error('Error al registrar entrada en BD:', error.message);
-        }
       } catch (err) {
         console.error('Excepción al conectar con Supabase:', err);
       }

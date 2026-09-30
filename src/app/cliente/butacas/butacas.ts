@@ -2,7 +2,6 @@ import { Component, OnInit, PLATFORM_ID, Inject } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { CuponService } from '../../core/services/cupon';
 
 interface Butaca {
   id: string;
@@ -95,8 +94,8 @@ interface FilaButacas {
         <div class="item"><span class="asiento disponible"></span> Estándar</div>
         <div class="item"><span class="asiento seleccionada"></span> Seleccionada</div>
         <div class="item"><span class="asiento ocupada"></span> Ocupada</div>
-        <div class="item"><span class="asiento vip"></span> VIP (R, S, T)</div>
-        <div class="item"><span class="asiento discapacidad"></span> Accesible (J, K)</div>
+        <div class="item"><span class="asiento vip"></span> VIP (R, S, T) - $8.000</div>
+        <div class="item"><span class="asiento discapacidad"></span> Accesible (J, K) - $6.000</div>
       </div>
 
       <div class="acciones-compra">
@@ -240,7 +239,7 @@ export class ButacasComponent implements OnInit {
     
     if (butaca.estado === 'disponible') {
       if (butaca.tipo === 'vip') {
-        const confirmar = confirm('Esta es una butaca VIP. ¿Deseas continuar?');
+        const confirmar = confirm('Esta es una butaca VIP ($8.000). ¿Deseas continuar?');
         if (!confirmar) return;
       }
       butaca.estado = 'seleccionada';
@@ -266,15 +265,19 @@ export class ButacasComponent implements OnInit {
     if (this.isBrowser) {
       const idsAsientos = seleccionados.map(a => a.id).join(', ');
       
-      // Guardar datos parciales para el ticket
+      // Calcular precio real de las entradas (VIP = $8000, Normal/Discapacidad = $6000)
+      const precioEntradas = seleccionados.reduce((acc, seat) => {
+        return acc + (seat.tipo === 'vip' ? 8000 : 6000);
+      }, 0);
+
       const datosParciales = {
         pelicula: this.nombrePelicula,
-        sala: `Sala ${this.peliculaId}`, // Sala dinámica basada en la película
-        butacas: idsAsientos
+        sala: `Sala ${this.peliculaId}`,
+        butacas: idsAsientos,
+        precioEntradas: precioEntradas
       };
       localStorage.setItem('ticket_parcial', JSON.stringify(datosParciales));
 
-      // Marcar butacas como ocupadas en el almacenamiento de esta película
       const storageKey = `butacas_ocupadas_pelicula_${this.peliculaId}`;
       const ocupadasGuardadas: string[] = JSON.parse(localStorage.getItem(storageKey) || '[]');
       const nuevosIds = seleccionados.map(a => a.id);

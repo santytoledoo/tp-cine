@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, PLATFORM_ID, Inject } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 interface TicketComprado {
@@ -12,6 +12,8 @@ interface TicketComprado {
   comentario: string;
   estado: 'activa' | 'finalizada' | 'cancelada';
   montoPagado: number;
+  butacas?: string;
+  candybar?: string;
 }
 
 @Component({
@@ -44,6 +46,7 @@ interface TicketComprado {
             <h3>{{ item.titulo }}</h3>
             <p class="fecha-sala">
               📅 {{ item.fechaFuncion | date:'dd/MM/yyyy - HH:mm' }} hs | 🎟️ {{ item.sala }}
+              <span *ngIf="item.butacas">| Asientos: {{ item.butacas }}</span>
             </p>
             <p class="monto-pagado">Pagaste: $ {{ item.montoPagado }}</p>
 
@@ -168,56 +171,42 @@ interface TicketComprado {
   `]
 })
 export class MisPeliculasComponent implements OnInit {
-  miCreditoFavor: number = 4500; 
+  isBrowser: boolean;
+  miCreditoFavor: number = 0; // Por defecto arranca en 0 para usuarios nuevos
   hoy: Date = new Date();
   historialPeliculas: TicketComprado[] = [];
 
-  constructor() {}
-
-  ngOnInit() {
-    this.cargarDatosMocheados();
+  constructor(@Inject(PLATFORM_ID) private platformId: Object) {
+    this.isBrowser = isPlatformBrowser(this.platformId);
   }
 
-  cargarDatosMocheados() {
-    const fechaPasada = new Date(this.hoy.getTime() - (10 * 24 * 60 * 60 * 1000));
-    const fechaFuturaLejana = new Date(this.hoy.getTime() + (5 * 60 * 60 * 1000));
-    const fechaFuturaCercana = new Date(this.hoy.getTime() + (1 * 60 * 60 * 1000));
+  ngOnInit() {
+    if (this.isBrowser) {
+      this.cargarCredito();
+      this.cargarHistorialReal();
+    }
+  }
 
-    this.historialPeliculas = [
-      {
-        id: 101,
-        titulo: 'Dune: Parte Dos',
-        fechaFuncion: fechaFuturaLejana,
-        sala: 'Sala VIP 2',
-        poster: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?q=80&w=200',
-        calificacionUsuario: 0,
-        comentario: '',
-        estado: 'activa',
-        montoPagado: 8000
-      },
-      {
-        id: 102,
-        titulo: 'Intensa Mente 2',
-        fechaFuncion: fechaFuturaCercana,
-        sala: 'Sala 3',
-        poster: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?q=80&w=200',
-        calificacionUsuario: 0,
-        comentario: '',
-        estado: 'activa',
-        montoPagado: 6500
-      },
-      {
-        id: 103,
-        titulo: 'Deadpool & Wolverine',
-        fechaFuncion: fechaPasada,
-        sala: 'Sala 1',
-        poster: 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=200',
-        calificacionUsuario: 5,
-        comentario: '¡Increíble, la mejor del año!',
-        estado: 'finalizada',
-        montoPagado: 5000
-      }
-    ];
+  cargarCredito() {
+    const creditoGuardado = localStorage.getItem('credito_favor');
+    if (creditoGuardado !== null) {
+      this.miCreditoFavor = Number(creditoGuardado);
+    } else {
+      this.miCreditoFavor = 0; // Si no hay registro, arranca en 0
+    }
+  }
+
+  cargarHistorialReal() {
+    const guardado = localStorage.getItem('historial_compras');
+    if (guardado) {
+      const parsed = JSON.parse(guardado);
+      this.historialPeliculas = parsed.map((item: any) => ({
+        ...item,
+        fechaFuncion: new Date(item.fechaFuncion)
+      }));
+    } else {
+      this.historialPeliculas = [];
+    }
   }
 
   puedeCancelar(fechaFuncion: Date): boolean {
@@ -237,12 +226,27 @@ export class MisPeliculasComponent implements OnInit {
     if (confirmacion) {
       ticket.estado = 'cancelada';
       this.miCreditoFavor += ticket.montoPagado;
+      this.guardarCredito();
+      this.actualizarStorage();
       alert(`¡Cancelación exitosa! Tu nuevo crédito a favor es de $ ${this.miCreditoFavor}`);
     }
   }
 
   calificar(pelicula: TicketComprado, estrellas: number) {
     pelicula.calificacionUsuario = estrellas;
+    this.actualizarStorage();
     alert(`Guardaste tu calificación de ${estrellas} estrellas para ${pelicula.titulo}`);
+  }
+
+  guardarCredito() {
+    if (this.isBrowser) {
+      localStorage.setItem('credito_favor', JSON.stringify(this.miCreditoFavor));
+    }
+  }
+
+  actualizarStorage() {
+    if (this.isBrowser) {
+      localStorage.setItem('historial_compras', JSON.stringify(this.historialPeliculas));
+    }
   }
 }

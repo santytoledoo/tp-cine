@@ -1,36 +1,61 @@
 <div class="perfil-container">
   <h2>Mi Perfil - UTN Cinemas</h2>
   
-  <div class="tarjeta-info">
-    <h3>Información de Cuenta y Beneficios</h3>
-    <p><strong>Nombre y Apellido:</strong> {{ usuario.nombre }} {{ usuario.apellido }}</p>
-    <p><strong>Correo Electrónico:</strong> {{ usuario.email }}</p>
-    
-    <div class="saldos-box">
-      <div class="saldo-item">
-        <span class="etiqueta">⭐ Puntos Acumulados</span>
-        <span class="valor">{{ usuario.puntos }} pts</span>
-      </div>
-      <div class="saldo-item">
-        <span class="etiqueta">💰 Crédito a Favor</span>
-        <span class="valor">${{ usuario.creditoFavor }}</span>
-      </div>
-    </div>
+  <!-- Estado de Carga -->
+  <div *ngIf="cargando" class="estado-mensaje" style="text-align: center; padding: 50px; color: #a4b0be;">
+    <p>Verificando sesión de usuario...</p>
   </div>
 
-  <div class="historial-canjes-section">
-    <h3>Historial de Canjes de Puntos</h3>
-    <div class="tabla-canjes" *ngIf="historialCanjes.length > 0; else sinCanjes">
-      <div class="item-canje" *ngFor="let canje of historialCanjes">
-        <div>
-          <strong>{{ canje.recompensa }}</strong>
-          <span class="fecha">Canjeado el {{ canje.fecha }}</span>
+  <!-- Si NO está logueado -->
+  <div *ngIf="!cargando && !isLoggedIn" class="tarjeta-info no-auth-box" style="text-align: center; padding: 40px;">
+    <h3>Acceso Restringido</h3>
+    <p style="margin-bottom: 20px;">No has iniciado sesión en ninguna cuenta. Para ver tus puntos, beneficios y gestionar tus compras, debés ingresar al sistema.</p>
+    <a routerLink="/login" class="btn-ir-login" style="background: #e94560; color: white; padding: 12px 25px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">Iniciar Sesión / Registrarse</a>
+  </div>
+
+  <!-- Si SÍ está logueado -->
+  <div *ngIf="!cargando && isLoggedIn">
+    <div class="tarjeta-info">
+      <h3>Información de Cuenta y Beneficios</h3>
+      <p><strong>Nombre y Apellido:</strong> {{ usuario.nombre }} {{ usuario.apellido }}</p>
+      <p><strong>Correo Electrónico:</strong> {{ usuario.email }}</p>
+      
+      <div class="saldos-box">
+        <div class="saldo-item">
+          <span class="etiqueta">⭐ Puntos Acumulados</span>
+          <span class="valor">{{ usuario.puntos }} pts</span>
+          <div class="botones-canje" style="margin-top: 15px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+            <button (click)="canjear('entrada')" class="btn-canje green">Canjear Entrada (500 pts)</button>
+            <button (click)="canjear('candy')" class="btn-canje red">Canjear Candy (150 pts)</button>
+          </div>
         </div>
-        <span class="puntos-gastados">-{{ canje.puntosGastados }} pts</span>
+        <div class="saldo-item">
+          <span class="etiqueta">💰 Crédito a Favor</span>
+          <span class="valor">${{ usuario.creditoFavor }}</span>
+        </div>
+      </div>
+      <p *ngIf="mensajeCanje" class="mensaje-canje-txt">{{ mensajeCanje }}</p>
+
+      <!-- Botón para cerrar sesión -->
+      <div class="acciones-sesion" style="margin-top: 30px; text-align: center;">
+        <button (click)="cerrarSesion()" class="btn-cerrar-sesion">🚪 Cerrar Sesión / Cambiar Cuenta</button>
       </div>
     </div>
-    <ng-template #sinCanjes>
-      <p class="sin-datos">Todavía no realizaste canjes con tus puntos del programa de fidelización.</p>
-    </ng-template>
+
+    <div class="historial-canjes-section">
+      <h3>Historial de Canjes de Puntos</h3>
+      <div class="tabla-canjes" *ngIf="historialCanjes.length > 0; else sinCanjes">
+        <div class="item-canje" *ngFor="let canje of historialCanjes">
+          <div>
+            <strong>{{ canje.recompensa }}</strong>
+            <span class="fecha">Canjeado el {{ canje.fecha }}</span>
+          </div>
+          <span class="puntos-gastados">-{{ canje.puntosGastados }} pts</span>
+        </div>
+      </div>
+      <ng-template #sinCanjes>
+        <p class="sin-datos">Todavía no realizaste canjes con tus puntos del programa de fidelización.</p>
+      </ng-template>
+    </div>
   </div>
 </div>

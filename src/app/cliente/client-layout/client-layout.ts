@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterOutlet, RouterLink } from '@angular/router';
+import { Component, OnInit, PLATFORM_ID, Inject } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { RouterOutlet, RouterLink, Router } from '@angular/router';
+import { SupabaseService } from '../../core/services/supabase';
 
 @Component({
   selector: 'app-client-layout',
@@ -17,7 +18,13 @@ import { RouterOutlet, RouterLink } from '@angular/router';
         <a routerLink="/perfil" routerLinkActive="active">Mi Perfil</a>
       </div>
       <div class="nav-auth">
-        <a routerLink="/login" class="btn-login">Ingresar / Admin</a>
+        @if (isLoggedIn) {
+          <button (click)="cerrarSesion()" class="btn-logout-nav">Cerrar Sesión</button>
+        } @else {
+          <a routerLink="/login" class="btn-login">Ingresar</a>
+        }
+        <!-- Botón de administración independiente -->
+        <a routerLink="/admin/dashboard" class="btn-admin-link" title="Panel de Administración">⚙️ Admin</a>
       </div>
     </nav>
 
@@ -38,6 +45,8 @@ import { RouterOutlet, RouterLink } from '@angular/router';
       position: sticky;
       top: 0;
       z-index: 1000;
+      flex-wrap: wrap;
+      gap: 1rem;
     }
     .nav-brand {
       color: #e94560;
@@ -61,6 +70,9 @@ import { RouterOutlet, RouterLink } from '@angular/router';
       }
     }
     .nav-auth {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
       .btn-login {
         background-color: #e94560;
         color: white;
@@ -70,11 +82,66 @@ import { RouterOutlet, RouterLink } from '@angular/router';
         font-weight: bold;
         font-size: 0.9rem;
         transition: background 0.2s;
-        &:hover {
-          background-color: #d63031;
-        }
+        &:hover { background-color: #d63031; }
+      }
+      .btn-logout-nav {
+        background-color: #2f3542;
+        color: #ff4757;
+        border: 1px solid #ff4757;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-weight: bold;
+        font-size: 0.9rem;
+        cursor: pointer;
+        &:hover { background-color: #ff4757; color: white; }
+      }
+      .btn-admin-link {
+        background-color: #141421;
+        color: #fbc531;
+        padding: 0.5rem 0.8rem;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 0.9rem;
+        border: 1px solid #2f3542;
+        &:hover { background-color: #2f3542; }
       }
     }
   `]
 })
-export class ClientLayoutComponent {}
+export class ClientLayoutComponent implements OnInit {
+  isLoggedIn: boolean = false;
+  isBrowser: boolean;
+
+  constructor(
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private supabase: SupabaseService,
+    private router: Router
+  ) {
+    this.isBrowser = isPlatformBrowser(this.platformId);
+  }
+
+  async ngOnInit() {
+    if (this.isBrowser) {
+      await this.checkAuth();
+      this.supabase.client.auth.onAuthStateChange((event, session) => {
+        this.isLoggedIn = !!session;
+      });
+    }
+  }
+
+  async checkAuth() {
+    try {
+      const { data: { session } } = await this.supabase.client.auth.getSession();
+      this.isLoggedIn = !!session;
+    } catch (e) {
+      this.isLoggedIn = false;
+    }
+  }
+
+  async cerrarSesion() {
+    await this.supabase.client.auth.signOut();
+    this.isLoggedIn = false;
+    this.router.navigate(['/login']);
+  }
+}

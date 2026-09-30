@@ -1,7 +1,22 @@
 <div class="candy-container">
-  <h2>Candy Bar</h2>
-  <p>Sumá combos y productos a tu entrada para retirarlos con el mismo QR.</p>
+  <h2>Candy Bar y Combos Especiales</h2>
+  <p>Sumá combos destacados y productos a tu entrada para retirarlos con el mismo QR.</p>
   
+  <!-- SECCIÓN DE COMBOS DESTACADOS -->
+  <div class="seccion-combos" *ngIf="combosEspeciales.length > 0">
+    <h3 class="titulo-seccion">⭐ Combos Especiales Recomendados</h3>
+    <div class="combos-grid">
+      <div class="combo-card" *ngFor="let combo of combosEspeciales">
+        <div class="badge-combo">Destacado</div>
+        <h3>{{ combo.nombre }}</h3>
+        <p class="desc">{{ combo.descripcion }}</p>
+        <p class="precio">${{ combo.precio }} <span class="puntos-req">({{ combo.puntosRequeridos }} pts)</span></p>
+        <button (click)="agregarCombo(combo)">Elegir Combo</button>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="titulo-seccion" style="margin-top: 40px;">Productos Individuales</h3>
   <div class="productos-grid">
     <div class="producto-card" *ngFor="let p of productos">
       <div class="icono">{{ p.img }}</div>

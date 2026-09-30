@@ -5,6 +5,7 @@ import { jsPDF } from 'jspdf';
 import * as XLSX from 'xlsx';
 import { CuponService } from '../../core/services/cupon';
 import { FidelizacionService } from '../../core/services/fidelizacion';
+import { SupabaseService } from '../../core/services/supabase';
 
 @Component({
   selector: 'app-dashboard',
@@ -96,7 +97,7 @@ import { FidelizacionService } from '../../core/services/fidelizacion';
 
         <!-- LOG DE AUDITORÍA -->
         <div class="log-container">
-          <h3>Log de Actividad</h3>
+          <h3>Log de Actividad (Supabase)</h3>
           <div class="lista-log">
             <div class="log-item" *ngFor="let log of logActividad">
               <div class="log-fecha">{{ log.fecha | date:'dd/MM/yyyy HH:mm' }}</div>
@@ -110,12 +111,8 @@ import { FidelizacionService } from '../../core/services/fidelizacion';
     </div>
   `,
   styles: [`
-    .dashboard-container {
-      padding: 40px 5%; background-color: #0f0f1a; color: white; min-height: 100vh; font-family: sans-serif;
-    }
-    .header-admin {
-      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 10px;
-    }
+    .dashboard-container { padding: 40px 5%; background-color: #0f0f1a; color: white; min-height: 100vh; font-family: sans-serif; }
+    .header-admin { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
     h2 { color: #e94560; margin: 0; font-size: 2rem; }
     p { color: #a4b0be; margin-bottom: 30px; }
     
@@ -125,9 +122,7 @@ import { FidelizacionService } from '../../core/services/fidelizacion';
     .btn-excel { background-color: #27ae60; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; }
     .btn-excel:hover { background-color: #219150; }
 
-    .tarjetas-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px;
-    }
+    .tarjetas-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }
     .tarjeta {
       background-color: #1a1a2e; border-radius: 10px; padding: 25px; display: flex; align-items: center; gap: 20px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.3); border-left: 5px solid #e94560; border: 1px solid #2f3542;
@@ -144,9 +139,7 @@ import { FidelizacionService } from '../../core/services/fidelizacion';
       h3 { color: #2ed573; margin-top: 0; margin-bottom: 5px; font-size: 1.3rem; border-bottom: 1px solid #2f3542; padding-bottom: 10px; }
       .config-desc { color: #a4b0be; font-size: 0.9rem; margin-bottom: 20px; }
     }
-    .config-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 20px;
-    }
+    .config-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 20px; }
     .config-item {
       display: flex; flex-direction: column; gap: 8px;
       label { font-size: 0.9rem; color: #fff; font-weight: 600; }
@@ -161,10 +154,7 @@ import { FidelizacionService } from '../../core/services/fidelizacion';
     }
     .mensaje-exito-config { color: #2ed573; font-weight: bold; margin-top: 10px; }
 
-    .paneles-inferiores {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 30px;
-    }
-
+    .paneles-inferiores { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 30px; }
     .graficos-container, .log-container {
       background-color: #1a1a2e; padding: 30px; border-radius: 10px; border: 1px solid #2f3542; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     }
@@ -201,20 +191,38 @@ export class DashboardComponent implements OnInit {
     { titulo: 'Dune: Parte Dos', ventas: 70, porcentaje: 35 }
   ];
 
-  logActividad = [
-    { fecha: new Date(), usuario: 'AdminSanty', accion: 'Exportó reporte de facturación a Excel.' },
-    { fecha: new Date(new Date().getTime() - 1000 * 60 * 30), usuario: 'EmpleadoJuan', accion: 'Validó código QR para Sala 1 (Butacas J5, J6).' },
-    { fecha: new Date(new Date().getTime() - 1000 * 60 * 60 * 2), usuario: 'AdminSanty', accion: 'Creó nueva función para Misión Imposible 8.' }
-  ];
+  logActividad: any[] = [];
 
   constructor(
     private datePipe: DatePipe,
     private cuponService: CuponService,
-    private fidelizacionService: FidelizacionService
+    private fidelizacionService: FidelizacionService,
+    private supabaseService: SupabaseService
   ) {}
 
-  ngOnInit() {
+  async ngOnInit() {
     this.porcentajePrimeraCompraConfig = this.cuponService.getPorcentajePrimeraCompra();
+    await this.cargarLogActividad();
+  }
+
+  async cargarLogActividad() {
+    try {
+      const { data } = await this.supabaseService.client
+        .from('logs_actividad')
+        .select('*')
+        .order('fecha', { ascending: false })
+        .limit(15);
+        
+      if (data && data.length > 0) {
+        this.logActividad = data;
+      }
+    } catch (e) {
+      // Fallback local por si la tabla aún no fue creada en Supabase
+      this.logActividad = [
+        { fecha: new Date(), usuario: 'AdminSanty', accion: 'Exportó reporte de facturación a Excel.' },
+        { fecha: new Date(), usuario: 'AdminSanty', accion: 'Creó nueva función para Misión Imposible 8.' }
+      ];
+    }
   }
 
   guardarConfiguracion() {
@@ -267,11 +275,19 @@ export class DashboardComponent implements OnInit {
     this.registrarAccion('Exportó reporte de facturación a Excel.');
   }
 
-  private registrarAccion(accion: string) {
-    this.logActividad.unshift({
-      fecha: new Date(),
+  private async registrarAccion(accion: string) {
+    const nuevoLog = {
+      fecha: new Date().toISOString(),
       usuario: 'AdminSanty',
       accion: accion
-    });
+    };
+
+    try {
+      await this.supabaseService.client.from('logs_actividad').insert(nuevoLog);
+    } catch (err) {
+      console.warn('No se pudo guardar el log en Supabase, se mantiene en memoria.');
+    }
+
+    this.logActividad.unshift(nuevoLog);
   }
 }

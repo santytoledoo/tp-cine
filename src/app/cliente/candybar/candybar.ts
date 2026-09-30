@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { FidelizacionService } from '../../core/services/fidelizacion';
 
 @Component({
   selector: 'app-candybar',
@@ -9,22 +10,37 @@ import { Router } from '@angular/router';
   templateUrl: './candybar.html',
   styleUrls: ['./candybar.scss']
 })
-export class CandybarComponent {
+export class CandybarComponent implements OnInit {
   productos = [
-    { nombre: 'Combo Mega (Pochoclo + 2 Bebidas)', precio: 8000, img: '🍿🥤' },
     { nombre: 'Pochoclo Grande', precio: 5000, img: '🍿' },
     { nombre: 'Gaseosa Grande', precio: 3000, img: '🥤' },
     { nombre: 'Nachos con Queso', precio: 4500, img: '🧀' }
   ];
-  
+
+  combosEspeciales: any[] = [];
   carrito: any[] = [];
   total = 0;
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private fidelizacionService: FidelizacionService
+  ) {}
+
+  ngOnInit() {
+    this.combosEspeciales = this.fidelizacionService.getCombosEspeciales();
+  }
 
   agregarAlCarrito(prod: any) {
     this.carrito.push(prod);
     this.total += prod.precio;
+  }
+
+  agregarCombo(combo: any) {
+    this.carrito.push({
+      nombre: combo.nombre,
+      precio: combo.precio
+    });
+    this.total += combo.precio;
   }
 
   finalizarCompra() {
@@ -34,13 +50,11 @@ export class CandybarComponent {
       let descripcionCandy = 'Sin productos de Candy Bar';
 
       if (this.carrito.length > 0) {
-        // Agrupar y contar cuántas veces se pidió cada producto
         const conteo: { [nombre: string]: number } = {};
         for (const item of this.carrito) {
           conteo[item.nombre] = (conteo[item.nombre] || 0) + 1;
         }
 
-        // Formatear el texto (ej: "Pochoclo Grande x2", "Gaseosa Grande")
         const itemsAgrupados = Object.keys(conteo).map(nombre => {
           const cantidad = conteo[nombre];
           return cantidad > 1 ? `${nombre} x${cantidad}` : nombre;
@@ -49,12 +63,16 @@ export class CandybarComponent {
         descripcionCandy = itemsAgrupados.join(', ');
       }
 
-      // Combinar con los datos de la función para el ticket
+      // Sumar el precio de las entradas + el total del candy bar
+      const precioEntradas = ticketParcial.precioEntradas || 6000;
+      const montoTotalPagado = precioEntradas + this.total;
+
       const ticketFinal = {
         pelicula: ticketParcial.pelicula || 'Película General',
         sala: ticketParcial.sala || 'Sala 1',
         butacas: ticketParcial.butacas || 'Sin asientos',
-        candybar: descripcionCandy
+        candybar: descripcionCandy,
+        montoPagado: montoTotalPagado
       };
 
       localStorage.setItem('ticket_final', JSON.stringify(ticketFinal));
