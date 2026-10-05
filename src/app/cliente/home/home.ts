@@ -209,7 +209,7 @@ export class HomeComponent {
       nombre: 'Deadpool & Wolverine',
       genero: 'Acción / Comedia',
       duracion: '127 min',
-      imagen: '/assets/deadpool.jpg', // <--- Lee tu imagen local a prueba de fallos
+      imagen: '/assets/deadpool.jpg',
       ventas: 1540
     },
     {
@@ -222,7 +222,7 @@ export class HomeComponent {
     },
     {
       id: 3,
-      nombre: 'Intensa Mente 2',
+      nombre: 'Intensamente 2',
       genero: 'Animación / Familiar',
       duracion: '96 min',
       imagen: '/assets/intensamente.jpg',

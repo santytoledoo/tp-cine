@@ -54,7 +54,7 @@ export class PerfilComponent implements OnInit {
       this.isLoggedIn = false;
     } finally {
       this.cargando = false;
-      this.cdr.detectChanges(); // Forzamos actualización visual al terminar de cargar
+      this.cdr.detectChanges(); 
     }
   }
 
@@ -68,7 +68,7 @@ export class PerfilComponent implements OnInit {
     const puntosGuardados = localStorage.getItem(`puntos_${user.id}`);
     this.usuario.puntos = puntosGuardados !== null ? Number(puntosGuardados) : 0;
 
-    let fechaCruda = ''; // Usamos esta variable temporal para guardar la fecha antes de formatearla
+    let fechaCruda = ''; 
 
     const extraGuardado = localStorage.getItem(`perfil_extra_${user.id}`);
     if (extraGuardado) {

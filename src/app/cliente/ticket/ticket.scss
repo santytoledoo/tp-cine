@@ -67,7 +67,7 @@
   &:hover { background-color: #b20710; }
 }
 
-/* Ocultar elementos innecesarios al imprimir/guardar PDF */
+
 @media print {
   body { background-color: white; }
   .ticket-wrapper h2, .ticket-wrapper > p, .btn-pdf { display: none; }

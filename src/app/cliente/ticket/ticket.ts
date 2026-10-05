@@ -99,7 +99,7 @@ export class TicketComponent implements OnInit {
 
   ngOnInit() {
     if (this.isBrowser) {
-      // 1. DIBUJAR PANTALLA INMEDIATAMENTE
+      
       const ticketGuardado = localStorage.getItem('ticket_final');
       let montoReal = 6000;
 

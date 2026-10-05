@@ -6,14 +6,14 @@
     <p>Cargando perfil...</p>
   </div>
 
-  <!-- Si NO está logueado -->
+  <!-- Si no esta logueado -->
   <div *ngIf="!cargando && !isLoggedIn" class="tarjeta-info no-auth-box" style="text-align: center; padding: 40px;">
     <h3>Acceso Restringido</h3>
     <p style="margin-bottom: 20px;">No has iniciado sesión en ninguna cuenta. Para ver tus puntos, beneficios y gestionar tus compras, debés ingresar al sistema.</p>
     <a routerLink="/login" class="btn-ir-login" style="background: #e94560; color: white; padding: 12px 25px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">Iniciar Sesión / Registrarse</a>
   </div>
 
-  <!-- Si SÍ está logueado -->
+  <!-- si esta logueado -->
   <div *ngIf="!cargando && isLoggedIn">
     <div class="tarjeta-info">
       <h3>Información de Cuenta y Datos Personales</h3>
@@ -40,7 +40,7 @@
       </div>
       <p *ngIf="mensajeCanje" class="mensaje-canje-txt">{{ mensajeCanje }}</p>
 
-      <!-- Botón para cerrar sesión -->
+      <!-- Boton para cerrar sesion -->
       <div class="acciones-sesion" style="margin-top: 30px; text-align: center;">
         <button (click)="cerrarSesion()" class="btn-cerrar-sesion">🚪 Cerrar Sesión / Cambiar Cuenta</button>
       </div>

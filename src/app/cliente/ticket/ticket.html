@@ -3,7 +3,7 @@
     <h2>¡Tu Entrada de Cine!</h2>
     <p>Presenta este código QR en el ingreso de la sala.</p>
 
-    <!-- El QR solo se renderiza si estamos en el navegador y hay datos, evitando errores de SSR -->
+    
     <div class="qr-wrapper">
       @if (isBrowser && miTextoParaElQr) {
         <qrcode 

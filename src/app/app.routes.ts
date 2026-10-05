@@ -14,17 +14,17 @@ import { EscanerComponent } from './empleado/escaner/escaner';
 import { ClientLayoutComponent } from './cliente/client-layout/client-layout';
 
 export const routes: Routes = [
-  // 1. Rutas de Autenticación
+  //  Rutas de Autenticación
   { path: 'registro', component: RegistroComponent },
   { path: 'login', component: LoginComponent },
 
-  // 2. Rutas de Administración y Empleados (independientes)
+  //  Rutas de Administración y Empleados 
   { path: 'admin/peliculas', component: PeliculasComponent },
   { path: 'admin/funciones', component: FuncionesComponent },
   { path: 'admin/dashboard', component: DashboardComponent },
   { path: 'escaner', component: EscanerComponent },
 
-  // 3. Rutas de Clientes (agrupadas con la barra de navegación superior)
+  //  Rutas de Clientes
   {
     path: '',
     component: ClientLayoutComponent,
@@ -39,6 +39,6 @@ export const routes: Routes = [
     ]
   },
 
-  // 4. Ruta Comodín (SIEMPRE debe ir al final de todo)
+  //  Ruta Comodín
   { path: '**', redirectTo: 'home' }
 ];
