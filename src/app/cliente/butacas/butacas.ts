@@ -2,6 +2,8 @@ import { Component, OnInit, PLATFORM_ID, Inject } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { CuponService } from '../../core/services/cupon';
+import { SupabaseService } from '../../core/services/supabase';
 
 interface Butaca {
   id: string;
@@ -30,7 +32,7 @@ interface FilaButacas {
       </header>
 
       <div class="aviso-pelicula-info">
-        <p>Película actual: <strong>{{ nombrePelicula }}</strong></p>
+        <p>Película actual: <strong>{{ nombrePelicula }}</strong> (Restricción: <strong>{{ restriccionEdad }}</strong>)</p>
       </div>
 
       <div class="pantalla-cine">PANTALLA</div>
@@ -167,16 +169,19 @@ export class ButacasComponent implements OnInit {
   isBrowser: boolean;
   peliculaId: string = '1';
   nombrePelicula: string = 'Deadpool & Wolverine';
+  restriccionEdad: string = '+18'; // Por defecto restrictiva para probar validación
 
   constructor(
     @Inject(PLATFORM_ID) private platformId: Object,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private cuponService: CuponService,
+    private supabase: SupabaseService
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
   }
 
-  ngOnInit() {
+  async ngOnInit() {
     this.route.queryParams.subscribe(params => {
       if (params['pelicula']) {
         this.peliculaId = params['pelicula'];
@@ -186,6 +191,37 @@ export class ButacasComponent implements OnInit {
       }
       this.inicializarAsientos();
     });
+
+    // Validar restricción de edad al cargar
+    await this.verificarRestriccionEdadUsuario();
+  }
+
+  async verificarRestriccionEdadUsuario() {
+    if (!this.isBrowser) return;
+
+    try {
+      const { data: { user } } = await this.supabase.client.auth.getUser();
+      if (user) {
+        const extraGuardado = localStorage.getItem(`perfil_extra_${user.id}`);
+        if (extraGuardado) {
+          const extra = JSON.parse(extraGuardado);
+          if (extra.fechaNacimiento) {
+            const anioNac = new Date(extra.fechaNacimiento).getFullYear();
+            const edad = new Date().getFullYear() - anioNac;
+
+            const validacion = this.cuponService.validarRestriccionEdad(this.restriccionEdad, edad);
+            if (!validacion.permitido) {
+              alert(validacion.mensaje);
+              this.router.navigate(['/home']);
+            } else if (this.restriccionEdad === '+13' && edad < 13) {
+              alert(validacion.mensaje); // Aviso de adulto responsable
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('No se pudo validar la edad automáticamente, permitiendo acceso libre.');
+    }
   }
 
   inicializarAsientos() {
@@ -265,7 +301,6 @@ export class ButacasComponent implements OnInit {
     if (this.isBrowser) {
       const idsAsientos = seleccionados.map(a => a.id).join(', ');
       
-      // Calcular precio real de las entradas (VIP = $8000, Normal/Discapacidad = $6000)
       const precioEntradas = seleccionados.reduce((acc, seat) => {
         return acc + (seat.tipo === 'vip' ? 8000 : 6000);
       }, 0);

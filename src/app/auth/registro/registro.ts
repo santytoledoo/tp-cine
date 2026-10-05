@@ -44,8 +44,19 @@ export class RegistroComponent {
 
         if (error) throw error;
 
-        // 2. Intentar guardar datos adicionales en la tabla perfiles de forma segura
+        // 2. Guardar datos adicionales en localStorage de forma persistente e inmediata para el perfil
         if (data.user) {
+          const perfilExtra = {
+            nombre: datos.nombre,
+            apellido: datos.apellido,
+            fechaNacimiento: datos.fechaNacimiento,
+            tipoSangre: datos.tipoSangre,
+            colorOjos: datos.colorOjos,
+            diasVacaciones: datos.diasVacaciones
+          };
+          localStorage.setItem(`perfil_extra_${data.user.id}`, JSON.stringify(perfilExtra));
+
+          // 3. Intentar guardar datos adicionales en la tabla perfiles de Supabase
           try {
             await this.supabase.client.from('perfiles').insert({
               id: data.user.id,
@@ -57,7 +68,7 @@ export class RegistroComponent {
               dias_vacaciones: datos.diasVacaciones
             });
           } catch (profileErr) {
-            console.warn('Tabla perfiles no creada aún, omitiendo guardado extra.');
+            console.warn('Tabla perfiles no creada aún, respaldado en localStorage.');
           }
         }
 

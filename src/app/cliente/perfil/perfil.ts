@@ -14,7 +14,7 @@ import { SupabaseService } from '../../core/services/supabase';
 })
 export class PerfilComponent implements OnInit {
   isBrowser: boolean;
-  cargando: boolean = false; // Empieza en false para evitar bloqueos visuales
+  cargando: boolean = false;
   isLoggedIn: boolean = false;
   
   usuario = {
@@ -22,6 +22,10 @@ export class PerfilComponent implements OnInit {
     nombre: '',
     apellido: '',
     email: '',
+    fechaNacimiento: '',
+    tipoSangre: '',
+    colorOjos: '',
+    diasVacaciones: 0,
     puntos: 0, 
     creditoFavor: 0, 
     esPrimeraCompra: true,
@@ -48,7 +52,6 @@ export class PerfilComponent implements OnInit {
 
   async verificarSesionRapida() {
     try {
-      // Creamos un tiempo límite de 1.5 segundos para que Supabase no cuelgue la app
       const sessionPromise = this.supabaseService.client.auth.getSession();
       const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 1500));
       
@@ -62,7 +65,6 @@ export class PerfilComponent implements OnInit {
         this.isLoggedIn = false;
       }
     } catch (e) {
-      // Si la red falla o demora, la app se desbloquea inmediatamente mostrando el estado libre
       console.warn('Verificación de sesión omitida o demorada:', e);
       this.isLoggedIn = false;
     } finally {
@@ -74,15 +76,26 @@ export class PerfilComponent implements OnInit {
     this.usuario.id = user.id;
     this.usuario.email = user.email || '';
     
-    // 1. Cargar crédito a favor persistente del usuario
+    // 1. Cargar crédito a favor y puntos
     const creditoGuardado = localStorage.getItem(`credito_favor_${user.id}`);
     this.usuario.creditoFavor = creditoGuardado !== null ? Number(creditoGuardado) : 0;
 
-    // 2. Cargar puntos reales del usuario (Si es nuevo, arranca estrictamente en 0)
     const puntosGuardados = localStorage.getItem(`puntos_${user.id}`);
     this.usuario.puntos = puntosGuardados !== null ? Number(puntosGuardados) : 0;
 
-    // 3. Buscar datos adicionales en la tabla perfiles de Supabase
+    // 2. Cargar datos adicionales desde localStorage (respaldo de registro)
+    const extraGuardado = localStorage.getItem(`perfil_extra_${user.id}`);
+    if (extraGuardado) {
+      const extra = JSON.parse(extraGuardado);
+      this.usuario.nombre = extra.nombre || '';
+      this.usuario.apellido = extra.apellido || '';
+      this.usuario.fechaNacimiento = extra.fechaNacimiento || '';
+      this.usuario.tipoSangre = extra.tipoSangre || '';
+      this.usuario.colorOjos = extra.colorOjos || '';
+      this.usuario.diasVacaciones = extra.diasVacaciones || 0;
+    }
+
+    // 3. Buscar o complementar datos en la tabla perfiles de Supabase
     try {
       const { data: perfilData } = await this.supabaseService.client
         .from('perfiles')
@@ -91,17 +104,22 @@ export class PerfilComponent implements OnInit {
         .maybeSingle();
 
       if (perfilData) {
-        this.usuario.nombre = perfilData.nombre || 'Usuario';
-        this.usuario.apellido = perfilData.apellido || '';
-      } else {
-        this.usuario.nombre = user.email?.split('@')[0] || 'Usuario';
-        this.usuario.apellido = '';
+        this.usuario.nombre = perfilData.nombre || this.usuario.nombre;
+        this.usuario.apellido = perfilData.apellido || this.usuario.apellido;
+        this.usuario.fechaNacimiento = perfilData.fecha_nacimiento || this.usuario.fechaNacimiento;
+        this.usuario.tipoSangre = perfilData.tipo_sangre || this.usuario.tipoSangre;
+        this.usuario.colorOjos = perfilData.color_ojos || this.usuario.colorOjos;
+        this.usuario.diasVacaciones = perfilData.dias_vacaciones ?? this.usuario.diasVacaciones;
       }
     } catch (err) {
+      console.warn('No se pudo conectar a la tabla perfiles de Supabase, usando datos locales.');
+    }
+
+    if (!this.usuario.nombre) {
       this.usuario.nombre = user.email?.split('@')[0] || 'Usuario';
     }
 
-    // 4. Cargar historial de canjes del usuario
+    // 4. Cargar historial de canjes
     const canjesGuardados = localStorage.getItem(`historial_canjes_${user.id}`);
     if (canjesGuardados) {
       this.historialCanjes = JSON.parse(canjesGuardados);
@@ -131,7 +149,6 @@ export class PerfilComponent implements OnInit {
         puntosGastados: puntosGastados
       });
 
-      // Guardar de forma persistente y asociada al ID del usuario
       localStorage.setItem(`puntos_${this.usuario.id}`, this.usuario.puntos.toString());
       localStorage.setItem(`historial_canjes_${this.usuario.id}`, JSON.stringify(this.historialCanjes));
 

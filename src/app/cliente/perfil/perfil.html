@@ -16,9 +16,13 @@
   <!-- Si SÍ está logueado -->
   <div *ngIf="!cargando && isLoggedIn">
     <div class="tarjeta-info">
-      <h3>Información de Cuenta y Beneficios</h3>
+      <h3>Información de Cuenta y Datos Personales</h3>
       <p><strong>Nombre y Apellido:</strong> {{ usuario.nombre }} {{ usuario.apellido }}</p>
       <p><strong>Correo Electrónico:</strong> {{ usuario.email }}</p>
+      <p><strong>Fecha de Nacimiento:</strong> {{ usuario.fechaNacimiento || 'No especificada' }}</p>
+      <p><strong>Tipo de Sangre:</strong> {{ usuario.tipoSangre || 'No especificado' }}</p>
+      <p><strong>Color de Ojos:</strong> {{ usuario.colorOjos || 'No especificado' }}</p>
+      <p><strong>Días de Vacaciones por Año:</strong> {{ usuario.diasVacaciones }} días</p>
       
       <div class="saldos-box">
         <div class="saldo-item">
