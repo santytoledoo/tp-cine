@@ -23,34 +23,36 @@ export class CuponService {
 
     const codigoLimpio = codigo.trim().toUpperCase();
 
+    // Regla 1: Solo en la primera compra se hace el 20% de descuento (o el configurable)
     if (codigoLimpio === 'PRIMERACOMPRA' || codigoLimpio === 'BIENVENIDA') {
       if (usuario.esPrimeraCompra) {
         return { 
           valido: true, 
           descuento: this.porcentajePrimeraCompra, 
-          mensaje: `¡Cupón aplicado con éxito! ${this.porcentajePrimeraCompra}% OFF en tu primera compra.` 
+          mensaje: `¡Cupón aplicado con éxito! ${this.porcentajePrimeraCompra}% OFF exclusivo en tu primera compra.` 
         };
       } else {
         return { 
           valido: false, 
           descuento: 0, 
-          mensaje: 'Este cupón es exclusivo para nuevos usuarios en su primera compra.' 
+          mensaje: 'Este cupón es exclusivo y único para la primera compra del usuario.' 
         };
       }
     }
 
+    // Regla 2: Si es mayor a 50 años, se le hace un 40% de descuento
     if (codigoLimpio === 'MAYORES50') {
       if (usuario.edad >= 50) {
         return { 
           valido: true, 
-          descuento: 30, 
-          mensaje: '¡Cupón de 30% OFF aplicado para mayores de 50 años!' 
+          descuento: 40, 
+          mensaje: '¡Cupón aplicado! 40% OFF exclusivo para mayores de 50 años.' 
         };
       } else {
         return { 
           valido: false, 
           descuento: 0, 
-          mensaje: 'Error: Este cupón es exclusivo para usuarios mayores de 50 años.' 
+          mensaje: 'Error: Este cupón requiere una edad de 50 años o más.' 
         };
       }
     }

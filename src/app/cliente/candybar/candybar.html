@@ -10,7 +10,7 @@
         <div class="badge-combo">Destacado</div>
         <h3>{{ combo.nombre }}</h3>
         <p class="desc">{{ combo.descripcion }}</p>
-        <p class="precio">${{ combo.precio }} <span class="puntos-req">({{ combo.puntosRequeridos }} pts)</span></p>
+        <p class="precio">${{ combo.precio }}</p>
         <button (click)="agregarCombo(combo)">Elegir Combo</button>
       </div>
     </div>
@@ -26,9 +26,29 @@
     </div>
   </div>
 
-  <div class="resumen" *ngIf="carrito.length > 0">
+  <!-- SECCIÓN DE CUPONES Y RESUMEN DE PAGO -->
+  <div class="resumen">
     <h3>Tu Pedido</h3>
-    <p>Llevás {{ carrito.length }} productos por un total de <strong>${{ total }}</strong></p>
+    <p>Entradas y productos seleccionados: <strong>${{ subtotal }}</strong></p>
+
+    <!-- Caja de Cupones -->
+    <div class="cupon-box" style="margin: 20px 0; padding: 15px; background: #222; border-radius: 8px;">
+      <label style="display: block; margin-bottom: 8px; font-size: 0.9rem; color: #ccc;">¿Tenés un código de descuento?</label>
+      <div style="display: flex; gap: 10px; justify-content: center;">
+        <input type="text" [(ngModel)]="codigoCupon" placeholder="Ej: PRIMERACOMPRA o MAYORES50" style="padding: 8px; border-radius: 4px; border: 1px solid #444; background: #111; color: white; width: 220px; text-transform: uppercase;">
+        <button (click)="aplicarCupon()" style="padding: 8px 15px; background: #3742fa; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">Aplicar</button>
+      </div>
+      <p *ngIf="mensajeCupon" [style.color]="cuponAplicado ? '#2ed573' : '#ff4757'" style="font-size: 0.85rem; margin-top: 8px;">{{ mensajeCupon }}</p>
+    </div>
+
+    <div *ngIf="cuponAplicado" style="margin-bottom: 15px; color: #2ed573; font-weight: bold;">
+      Descuento aplicado ({{ descuentoAplicadoPorcentaje }}%): - ${{ montoDescuento }}
+    </div>
+
+    <p style="font-size: 1.3rem; margin-bottom: 20px; color: #fff;">
+      Total Final a Pagar: <strong style="color: #2ed573;">${{ totalFinal }}</strong>
+    </p>
+
     <button class="btn-pagar" (click)="finalizarCompra()">Finalizar Compra y Pagar</button>
   </div>
 </div>
