@@ -144,7 +144,7 @@ export class TicketComponent implements OnInit {
           montoPagado: montoReal
         };
 
-        // Guardar en el historial de "Mis Películas" con el monto real pagado
+        // 1. Guardar en el historial de "Mis Películas" con el monto real pagado
         const historial = JSON.parse(localStorage.getItem('historial_compras') || '[]');
         const yaExiste = historial.some((h: any) => h.butacas === datos.butacas && h.titulo === datos.pelicula);
         
@@ -163,6 +163,19 @@ export class TicketComponent implements OnInit {
             montoPagado: montoReal
           });
           localStorage.setItem('historial_compras', JSON.stringify(historial));
+
+          // 2. Acumular puntos de fidelización para el usuario actual (1 punto por cada peso gastado)
+          try {
+            const { data: { user } } = await this.supabase.client.auth.getUser();
+            if (user) {
+              const puntosKey = `puntos_${user.id}`;
+              const puntosActuales = Number(localStorage.getItem(puntosKey) || '0');
+              const puntosGanados = Math.floor(montoReal * 1);
+              localStorage.setItem(puntosKey, (puntosActuales + puntosGanados).toString());
+            }
+          } catch (e) {
+            console.warn('No se pudieron sumar puntos al usuario logueado', e);
+          }
         }
       }
 

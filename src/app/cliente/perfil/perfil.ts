@@ -1,4 +1,4 @@
-import { Component, OnInit, PLATFORM_ID, Inject, NgZone } from '@angular/core';
+import { Component, OnInit, PLATFORM_ID, Inject } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -14,6 +14,7 @@ import { SupabaseService } from '../../core/services/supabase';
 })
 export class PerfilComponent implements OnInit {
   isBrowser: boolean;
+  cargando: boolean = false; // Empieza en false para evitar bloqueos visuales
   isLoggedIn: boolean = false;
   
   usuario = {
@@ -34,24 +35,38 @@ export class PerfilComponent implements OnInit {
     @Inject(PLATFORM_ID) private platformId: Object,
     private fidelizacionService: FidelizacionService,
     private supabaseService: SupabaseService,
-    private router: Router,
-    private ngZone: NgZone
+    private router: Router
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
   }
 
   async ngOnInit() {
     if (this.isBrowser) {
-      this.supabaseService.client.auth.onAuthStateChange(async (event, session) => {
-        this.ngZone.run(async () => {
-          if (session && session.user) {
-            this.isLoggedIn = true;
-            await this.procesarUsuario(session.user);
-          } else {
-            this.isLoggedIn = false;
-          }
-        });
-      });
+      await this.verificarSesionRapida();
+    }
+  }
+
+  async verificarSesionRapida() {
+    try {
+      // Creamos un tiempo límite de 1.5 segundos para que Supabase no cuelgue la app
+      const sessionPromise = this.supabaseService.client.auth.getSession();
+      const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 1500));
+      
+      const res: any = await Promise.race([sessionPromise, timeoutPromise]);
+      const session = res?.data?.session;
+
+      if (session && session.user) {
+        this.isLoggedIn = true;
+        await this.procesarUsuario(session.user);
+      } else {
+        this.isLoggedIn = false;
+      }
+    } catch (e) {
+      // Si la red falla o demora, la app se desbloquea inmediatamente mostrando el estado libre
+      console.warn('Verificación de sesión omitida o demorada:', e);
+      this.isLoggedIn = false;
+    } finally {
+      this.cargando = false;
     }
   }
 
@@ -59,20 +74,15 @@ export class PerfilComponent implements OnInit {
     this.usuario.id = user.id;
     this.usuario.email = user.email || '';
     
-    // 1. Cargar crédito a favor persistente
-    const creditoGuardado = localStorage.getItem(`credito_favor_${user.id}`) || localStorage.getItem('credito_favor');
-    this.usuario.creditoFavor = creditoGuardado ? Number(creditoGuardado) : 0;
+    // 1. Cargar crédito a favor persistente del usuario
+    const creditoGuardado = localStorage.getItem(`credito_favor_${user.id}`);
+    this.usuario.creditoFavor = creditoGuardado !== null ? Number(creditoGuardado) : 0;
 
-    // 2. Cargar puntos reales del usuario (Si no existen, arranca en 0 reales)
+    // 2. Cargar puntos reales del usuario (Si es nuevo, arranca estrictamente en 0)
     const puntosGuardados = localStorage.getItem(`puntos_${user.id}`);
-    if (puntosGuardados !== null) {
-      this.usuario.puntos = Number(puntosGuardados);
-    } else {
-      this.usuario.puntos = 0; // Usuario nuevo arranca estrictamente en 0 puntos
-      localStorage.setItem(`puntos_${user.id}`, '0');
-    }
+    this.usuario.puntos = puntosGuardados !== null ? Number(puntosGuardados) : 0;
 
-    // 3. Buscar datos en la tabla perfiles de Supabase
+    // 3. Buscar datos adicionales en la tabla perfiles de Supabase
     try {
       const { data: perfilData } = await this.supabaseService.client
         .from('perfiles')
@@ -91,7 +101,7 @@ export class PerfilComponent implements OnInit {
       this.usuario.nombre = user.email?.split('@')[0] || 'Usuario';
     }
 
-    // 4. Cargar historial de canjes (vacío por defecto para cuentas nuevas)
+    // 4. Cargar historial de canjes del usuario
     const canjesGuardados = localStorage.getItem(`historial_canjes_${user.id}`);
     if (canjesGuardados) {
       this.historialCanjes = JSON.parse(canjesGuardados);
@@ -121,6 +131,7 @@ export class PerfilComponent implements OnInit {
         puntosGastados: puntosGastados
       });
 
+      // Guardar de forma persistente y asociada al ID del usuario
       localStorage.setItem(`puntos_${this.usuario.id}`, this.usuario.puntos.toString());
       localStorage.setItem(`historial_canjes_${this.usuario.id}`, JSON.stringify(this.historialCanjes));
 
