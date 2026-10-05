@@ -62,5 +62,13 @@ export class FidelizacionService {
   actualizarCostos(entrada: number, candy: number) {
     this.costoEntradaPuntos = entrada;
     this.costoCandyPuntos = candy;
+    
+  }
+  getCostoEntradaPuntos(): number {
+    return this.costoEntradaPuntos;
+  }
+
+  getCostoCandyPuntos(): number {
+    return this.costoCandyPuntos;
   }
 }

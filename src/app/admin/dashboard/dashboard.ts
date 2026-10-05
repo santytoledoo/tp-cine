@@ -35,7 +35,7 @@ import { SupabaseService } from '../../core/services/supabase';
         </div>
         
         <div class="tarjeta">
-          <div class="icono">🎟️</div>
+          <div class="icono">🎟️️</div>
           <div class="info">
             <h3>Entradas Vendidas</h3>
             <p class="numero">{{ entradasVendidas }}</p>
@@ -52,7 +52,7 @@ import { SupabaseService } from '../../core/services/supabase';
         </div>
       </div>
 
-      <!-- SECCIÓN DE CONFIGURACIÓN DEL ADMIN -->
+      <!-- SECCIÓN DE CONFIGURACIÓN DEL ADMIN (AHORA 100% FUNCIONAL) -->
       <div class="config-admin-box">
         <h3>⚙️ Configuración del Sistema (Cupones y Fidelización)</h3>
         <p class="config-desc">Modificá en tiempo real las reglas de descuento y costos de puntos exigidas por la administración.</p>
@@ -201,7 +201,11 @@ export class DashboardComponent implements OnInit {
   ) {}
 
   async ngOnInit() {
+    // Al cargar el dashboard, levantamos los valores actuales reales que tienen los servicios
     this.porcentajePrimeraCompraConfig = this.cuponService.getPorcentajePrimeraCompra();
+    this.costoEntradaPuntosConfig = this.fidelizacionService.getCostoEntradaPuntos();
+    this.costoCandyPuntosConfig = this.fidelizacionService.getCostoCandyPuntos();
+    
     await this.cargarLogActividad();
   }
 
@@ -217,7 +221,6 @@ export class DashboardComponent implements OnInit {
         this.logActividad = data;
       }
     } catch (e) {
-      // Fallback local por si la tabla aún no fue creada en Supabase
       this.logActividad = [
         { fecha: new Date(), usuario: 'AdminSanty', accion: 'Exportó reporte de facturación a Excel.' },
         { fecha: new Date(), usuario: 'AdminSanty', accion: 'Creó nueva función para Misión Imposible 8.' }
@@ -226,6 +229,7 @@ export class DashboardComponent implements OnInit {
   }
 
   guardarConfiguracion() {
+    // Aplicamos los cambios directamente en los servicios globales
     this.cuponService.setPorcentajePrimeraCompra(Number(this.porcentajePrimeraCompraConfig));
     this.fidelizacionService.actualizarCostos(Number(this.costoEntradaPuntosConfig), Number(this.costoCandyPuntosConfig));
 

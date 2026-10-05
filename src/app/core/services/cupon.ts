@@ -4,12 +4,10 @@ import { Injectable } from '@angular/core';
   providedIn: 'root'
 })
 export class CuponService {
-  // Configurable por el administrador según el PDF
   private porcentajePrimeraCompra: number = 20; 
 
   constructor() {}
 
-  // Permite al Admin modificar el porcentaje del cupón de bienvenida
   setPorcentajePrimeraCompra(porcentaje: number) {
     this.porcentajePrimeraCompra = porcentaje;
   }
@@ -18,7 +16,6 @@ export class CuponService {
     return this.porcentajePrimeraCompra;
   }
 
-  // Lógica de validación de cupones (Primera compra + Mayores de 50 años)
   validarCupon(codigo: string, usuario: { esPrimeraCompra: boolean, edad: number }): { valido: boolean, descuento: number, mensaje: string } {
     if (!codigo) {
       return { valido: false, descuento: 0, mensaje: 'Ingresá un código de cupón.' };
@@ -26,7 +23,6 @@ export class CuponService {
 
     const codigoLimpio = codigo.trim().toUpperCase();
 
-    // 1. Cupón de primera compra (20% por defecto o configurado)
     if (codigoLimpio === 'PRIMERACOMPRA' || codigoLimpio === 'BIENVENIDA') {
       if (usuario.esPrimeraCompra) {
         return { 
@@ -43,7 +39,6 @@ export class CuponService {
       }
     }
 
-    // 2. Cupón exclusivo para mayores de 50 años
     if (codigoLimpio === 'MAYORES50') {
       if (usuario.edad >= 50) {
         return { 
@@ -63,7 +58,6 @@ export class CuponService {
     return { valido: false, descuento: 0, mensaje: 'El código de cupón ingresado no es válido.' };
   }
 
-  // Validación de Restricción de Edad para la película
   validarRestriccionEdad(peliculaRestriccion: string, edadUsuario: number): { permitido: boolean, mensaje: string } {
     if (peliculaRestriccion === '+18' && edadUsuario < 18) {
       return { 

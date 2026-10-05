@@ -1,6 +1,7 @@
-import { Component, OnInit, PLATFORM_ID, Inject } from '@angular/core';
+import { Component, OnInit, PLATFORM_ID, Inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { SupabaseService } from '../../core/services/supabase';
 
 interface TicketComprado {
   id: number;
@@ -91,113 +92,50 @@ interface TicketComprado {
     </div>
   `,
   styles: [`
-    .mis-peliculas-container {
-      min-height: 100vh;
-      background-color: #0f0f1a;
-      color: #fff;
-      padding: 40px 5%;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    .header-perfil {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 30px;
-      flex-wrap: wrap;
-      gap: 20px;
-      h2 { color: #e94560; font-size: 2.2rem; margin: 0 0 10px 0; }
-      .subtitulo { color: #a4b0be; margin: 0; font-size: 1rem; }
-    }
-    .credito-box {
-      background-color: #1a1a2e;
-      padding: 15px 25px;
-      border-radius: 12px;
-      border: 1px solid #2ed573;
-      text-align: center;
-      box-shadow: 0 4px 15px rgba(46, 213, 115, 0.2);
-      .etiqueta { display: block; font-size: 0.9rem; color: #a4b0be; margin-bottom: 5px; }
-      .monto { font-size: 1.8rem; font-weight: bold; color: #2ed573; }
-    }
+    .mis-peliculas-container { min-height: 100vh; background-color: #0f0f1a; color: #fff; padding: 40px 5%; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    .header-perfil { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 20px; h2 { color: #e94560; font-size: 2.2rem; margin: 0 0 10px 0; } .subtitulo { color: #a4b0be; margin: 0; font-size: 1rem; } }
+    .credito-box { background-color: #1a1a2e; padding: 15px 25px; border-radius: 12px; border: 1px solid #2ed573; text-align: center; box-shadow: 0 4px 15px rgba(46, 213, 115, 0.2); .etiqueta { display: block; font-size: 0.9rem; color: #a4b0be; margin-bottom: 5px; } .monto { font-size: 1.8rem; font-weight: bold; color: #2ed573; } }
     .grilla-historial { display: flex; flex-direction: column; gap: 20px; max-width: 1000px; margin: 0 auto; }
-    .pelicula-historial-card {
-      background-color: #1a1a2e;
-      border-radius: 12px;
-      display: flex;
-      overflow: hidden;
-      border: 1px solid #2f3542;
-      transition: transform 0.2s;
-      &.cancelada { opacity: 0.6; filter: grayscale(100%); }
-      &:hover { transform: translateY(-3px); border-color: #e94560; }
-      .poster-box {
-        width: 150px;
-        position: relative;
-        img { width: 100%; height: 100%; object-fit: cover; }
-        .badge-estado {
-          position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.8);
-          padding: 5px 10px; border-radius: 4px; font-weight: bold; font-size: 0.8rem;
-        }
-      }
-      .detalle-box {
-        padding: 20px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        flex: 1;
-        h3 { margin: 0 0 8px 0; font-size: 1.4rem; color: #fff; }
-        .fecha-sala { color: #a4b0be; font-size: 1rem; margin-bottom: 5px; }
-        .monto-pagado { color: #2ed573; font-weight: bold; font-size: 0.95rem; margin-bottom: 15px; }
-        .seccion-calificacion {
-          display: flex; align-items: center; gap: 10px; font-size: 0.9rem; color: #bbb; flex-wrap: wrap;
-          .estrellas-selector span {
-            font-size: 1.5rem; color: #555; cursor: pointer; transition: 0.2s;
-            &.activa, &:hover { color: #f5c518; }
-          }
-          .comentario-guardado { width: 100%; color: #888; margin: 5px 0 0 0; }
-        }
-        .seccion-acciones {
-          background: #141421; padding: 15px; border-radius: 8px; border: 1px dashed #2f3542;
-          .aviso-cancelacion { font-size: 0.85rem; color: #a4b0be; margin: 0 0 10px 0; }
-          .btn-cancelar {
-            background-color: #e94560; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer;
-            &:disabled { background-color: #2f3542; color: #747d8c; cursor: not-allowed; }
-            &:not(:disabled):hover { background-color: #d63031; }
-          }
-          .error-tiempo { color: #ff4757; font-size: 0.85rem; margin: 10px 0 0 0; font-weight: bold; }
-        }
-        .seccion-cancelada { color: #ff4757; font-weight: bold; font-size: 0.95rem; }
-      }
-    }
+    .pelicula-historial-card { background-color: #1a1a2e; border-radius: 12px; display: flex; overflow: hidden; border: 1px solid #2f3542; transition: transform 0.2s; &.cancelada { opacity: 0.6; filter: grayscale(100%); } &:hover { transform: translateY(-3px); border-color: #e94560; } .poster-box { width: 150px; position: relative; img { width: 100%; height: 100%; object-fit: cover; } .badge-estado { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.8); padding: 5px 10px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; } } .detalle-box { padding: 20px; display: flex; flex-direction: column; justify-content: center; flex: 1; h3 { margin: 0 0 8px 0; font-size: 1.4rem; color: #fff; } .fecha-sala { color: #a4b0be; font-size: 1rem; margin-bottom: 5px; } .monto-pagado { color: #2ed573; font-weight: bold; font-size: 0.95rem; margin-bottom: 15px; } .seccion-calificacion { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; color: #bbb; flex-wrap: wrap; .estrellas-selector span { font-size: 1.5rem; color: #555; cursor: pointer; transition: 0.2s; &.activa, &:hover { color: #f5c518; } } .comentario-guardado { width: 100%; color: #888; margin: 5px 0 0 0; } } .seccion-acciones { background: #141421; padding: 15px; border-radius: 8px; border: 1px dashed #2f3542; .aviso-cancelacion { font-size: 0.85rem; color: #a4b0be; margin: 0 0 10px 0; } .btn-cancelar { background-color: #e94560; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; &:disabled { background-color: #2f3542; color: #747d8c; cursor: not-allowed; } &:not(:disabled):hover { background-color: #d63031; } } .error-tiempo { color: #ff4757; font-size: 0.85rem; margin: 10px 0 0 0; font-weight: bold; } } .seccion-cancelada { color: #ff4757; font-weight: bold; font-size: 0.95rem; } } }
     .sin-historial { text-align: center; color: #777; font-size: 1.2rem; margin-top: 50px; }
   `]
 })
 export class MisPeliculasComponent implements OnInit {
   isBrowser: boolean;
-  miCreditoFavor: number = 0; // Por defecto arranca en 0 para usuarios nuevos
-  hoy: Date = new Date();
+  miCreditoFavor: number = 0; 
   historialPeliculas: TicketComprado[] = [];
+  userId: string = 'invitado'; 
 
-  constructor(@Inject(PLATFORM_ID) private platformId: Object) {
+  constructor(
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private supabase: SupabaseService,
+    private cdr: ChangeDetectorRef
+  ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
   }
 
-  ngOnInit() {
+  async ngOnInit() {
     if (this.isBrowser) {
+      try {
+        const { data } = await this.supabase.client.auth.getSession();
+        if (data.session?.user) {
+          this.userId = data.session.user.id;
+        }
+      } catch (e) { }
+      
       this.cargarCredito();
       this.cargarHistorialReal();
+      this.cdr.detectChanges();
     }
   }
 
   cargarCredito() {
-    const creditoGuardado = localStorage.getItem('credito_favor');
-    if (creditoGuardado !== null) {
-      this.miCreditoFavor = Number(creditoGuardado);
-    } else {
-      this.miCreditoFavor = 0; // Si no hay registro, arranca en 0
-    }
+    const creditoGuardado = localStorage.getItem(`credito_favor_${this.userId}`);
+    this.miCreditoFavor = creditoGuardado !== null ? Number(creditoGuardado) : 0;
   }
 
   cargarHistorialReal() {
-    const guardado = localStorage.getItem('historial_compras');
+    const guardado = localStorage.getItem(`historial_compras_${this.userId}`);
     if (guardado) {
       const parsed = JSON.parse(guardado);
       this.historialPeliculas = parsed.map((item: any) => ({
@@ -211,8 +149,7 @@ export class MisPeliculasComponent implements OnInit {
 
   puedeCancelar(fechaFuncion: Date): boolean {
     const msDiferencia = fechaFuncion.getTime() - new Date().getTime();
-    const horasDiferencia = msDiferencia / (1000 * 60 * 60);
-    return horasDiferencia >= 2;
+    return (msDiferencia / (1000 * 60 * 60)) >= 2;
   }
 
   cancelarEntrada(ticket: TicketComprado) {
@@ -221,9 +158,7 @@ export class MisPeliculasComponent implements OnInit {
       return;
     }
 
-    const confirmacion = confirm(`¿Estás seguro que querés cancelar tu entrada para ${ticket.titulo}? Se te acreditarán $ ${ticket.montoPagado} en tu cuenta.`);
-    
-    if (confirmacion) {
+    if (confirm(`¿Estás seguro que querés cancelar tu entrada para ${ticket.titulo}? Se te acreditarán $ ${ticket.montoPagado} en tu cuenta.`)) {
       ticket.estado = 'cancelada';
       this.miCreditoFavor += ticket.montoPagado;
       this.guardarCredito();
@@ -239,14 +174,10 @@ export class MisPeliculasComponent implements OnInit {
   }
 
   guardarCredito() {
-    if (this.isBrowser) {
-      localStorage.setItem('credito_favor', JSON.stringify(this.miCreditoFavor));
-    }
+    if (this.isBrowser) localStorage.setItem(`credito_favor_${this.userId}`, JSON.stringify(this.miCreditoFavor));
   }
 
   actualizarStorage() {
-    if (this.isBrowser) {
-      localStorage.setItem('historial_compras', JSON.stringify(this.historialPeliculas));
-    }
+    if (this.isBrowser) localStorage.setItem(`historial_compras_${this.userId}`, JSON.stringify(this.historialPeliculas));
   }
 }

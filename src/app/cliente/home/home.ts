@@ -21,13 +21,13 @@ interface PeliculaHome {
         <h1>UTN CINEMAS</h1>
         <p>El sistema oficial de reservas de entradas y confiteria.</p>
         <div class="hero-buttons">
-          <a routerLink="/peliculas" class="btn-primary">Ver Cartelera Completa</a>
+          <a routerLink="/admin/peliculas" class="btn-primary">Ver Cartelera Completa</a>
           <a routerLink="/candybar" class="btn-secondary">Visitar Candy Bar</a>
         </div>
       </header>
 
       <section class="top-peliculas">
-        <h2>Top 3: Las Peliculas Mas Vendidas</h2>
+        <h2>Top 3: Las Películas Más Vendidas</h2>
         <p class="section-subtitle">Las favoritas de nuestros espectadores listas para reservar.</p>
 
         <div class="grid-top">
@@ -161,6 +161,7 @@ interface PeliculaHome {
               width: 100%;
               height: 100%;
               object-fit: cover;
+              object-position: center;
             }
           }
 
@@ -208,8 +209,7 @@ export class HomeComponent {
       nombre: 'Deadpool & Wolverine',
       genero: 'Acción / Comedia',
       duracion: '127 min',
-      // Imagen temática de acción / estética roja y oscura
-      imagen: 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=600&auto=format&fit=crop',
+      imagen: '/assets/deadpool.jpg', // <--- Lee tu imagen local a prueba de fallos
       ventas: 1540
     },
     {
@@ -217,8 +217,7 @@ export class HomeComponent {
       nombre: 'Dune: Parte Dos',
       genero: 'Ciencia Ficción / Aventura',
       duracion: '166 min',
-      // Imagen temática de desierto / ciencia ficción
-      imagen: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?q=80&w=600&auto=format&fit=crop',
+      imagen: '/assets/dune.jpg',
       ventas: 1420
     },
     {
@@ -226,8 +225,7 @@ export class HomeComponent {
       nombre: 'Intensa Mente 2',
       genero: 'Animación / Familiar',
       duracion: '96 min',
-      // Imagen temática colorida / expresiva
-      imagen: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?q=80&w=600&auto=format&fit=crop',
+      imagen: '/assets/intensamente.jpg',
       ventas: 1280
     }
   ];

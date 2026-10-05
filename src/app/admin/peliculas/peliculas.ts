@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, PLATFORM_ID, Inject } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { SupabaseService } from '../../core/services/supabase';
 
 interface Resena {
   usuario: string;
@@ -23,6 +24,8 @@ interface Pelicula {
   fechaEstreno: Date;
   precioBase: number;
   precioPreventa: number;
+  nuevoComentario?: string;
+  nuevaCalificacion?: number;
 }
 
 @Component({
@@ -93,8 +96,8 @@ interface Pelicula {
                     }
                   </div>
                   <div class="form-agregar-resena">
-                    <input type="text" [(ngModel)]="nuevoComentario" placeholder="Comentario corto...">
-                    <select [(ngModel)]="nuevaCalificacion">
+                    <input type="text" [(ngModel)]="peli.nuevoComentario" placeholder="Comentario corto...">
+                    <select [(ngModel)]="peli.nuevaCalificacion">
                       <option [value]="5">5 ⭐</option>
                       <option [value]="4">4 ⭐</option>
                       <option [value]="3">3 ⭐</option>
@@ -213,7 +216,10 @@ interface Pelicula {
     .no-results { text-align: center; color: #888; grid-column: 1 / -1; font-size: 1.1rem; margin-top: 2rem; }
   `]
 })
-export class PeliculasComponent {
+export class PeliculasComponent implements OnInit {
+  isBrowser: boolean;
+  nombreUsuarioActual: string = 'Usuario Anónimo';
+  
   tabActual: 'cartelera' | 'proximamente' = 'cartelera';
   searchTerm: string = '';
   selectedGenero: string = 'todos';
@@ -283,8 +289,65 @@ export class PeliculasComponent {
     }
   ];
 
-  nuevoComentario: string = '';
-  nuevaCalificacion: number = 5;
+  constructor(
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private supabase: SupabaseService
+  ) {
+    this.isBrowser = isPlatformBrowser(this.platformId);
+  }
+
+  async ngOnInit() {
+    if (this.isBrowser) {
+      await this.obtenerNombreUsuario();
+      this.cargarReseñasGuardadas();
+    }
+
+    this.peliculas.forEach(p => {
+      p.nuevoComentario = '';
+      p.nuevaCalificacion = 5;
+    });
+  }
+
+  async obtenerNombreUsuario() {
+    try {
+      const { data } = await this.supabase.client.auth.getSession();
+      
+      if (data.session?.user) {
+        const userId = data.session.user.id;
+        const extraGuardado = localStorage.getItem(`perfil_extra_${userId}`);
+        if (extraGuardado) {
+          const extra = JSON.parse(extraGuardado);
+          if (extra.nombre) {
+            this.nombreUsuarioActual = `${extra.nombre} ${extra.apellido || ''}`.trim();
+            return;
+          }
+        }
+        this.nombreUsuarioActual = data.session.user.email?.split('@')[0] || 'Usuario Registrado';
+      }
+    } catch (e) {
+      console.warn('No se pudo verificar la sesión.');
+    }
+  }
+
+  cargarReseñasGuardadas() {
+    this.peliculas.forEach(peli => {
+      const resenasGuardadas = localStorage.getItem(`resenas_pelicula_${peli.id}`);
+      if (resenasGuardadas) {
+        peli.resenas = JSON.parse(resenasGuardadas);
+        // Recalcular estrellas promedio con las reseñas cargadas
+        if (peli.resenas.length > 0) {
+          const suma = peli.resenas.reduce((acc, curr) => acc + curr.calificacion, 0);
+          peli.estrellasPromedio = Number((suma / peli.resenas.length).toFixed(1));
+        }
+      }
+    });
+  }
+
+  guardarReseñasEnStorage(peli: Pelicula) {
+    if (this.isBrowser) {
+      localStorage.setItem(`resenas_pelicula_${peli.id}`, JSON.stringify(peli.resenas));
+    }
+  }
 
   get peliculasFiltradas() {
     return this.peliculas.filter(peli => {
@@ -314,15 +377,21 @@ export class PeliculasComponent {
   }
 
   agregarResena(peli: Pelicula) {
-    if (this.nuevoComentario.trim()) {
-      peli.resenas.push({
-        usuario: 'Usuario Anónimo',
-        comentario: this.nuevoComentario,
-        calificacion: Number(this.nuevaCalificacion)
+    if (peli.nuevoComentario && peli.nuevoComentario.trim()) {
+      peli.resenas.unshift({
+        usuario: this.nombreUsuarioActual, 
+        comentario: peli.nuevoComentario,
+        calificacion: Number(peli.nuevaCalificacion)
       });
+      
       const suma = peli.resenas.reduce((acc, curr) => acc + curr.calificacion, 0);
       peli.estrellasPromedio = Number((suma / peli.resenas.length).toFixed(1));
-      this.nuevoComentario = '';
+      
+      // Guardamos en localStorage para que persista entre cuentas y sesiones
+      this.guardarReseñasEnStorage(peli);
+
+      peli.nuevoComentario = '';
+      peli.nuevaCalificacion = 5;
     }
   }
 }
