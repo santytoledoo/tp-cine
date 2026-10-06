@@ -23,8 +23,8 @@ import { SupabaseService } from '../../core/services/supabase';
         } @else {
           <a routerLink="/login" class="btn-login">Ingresar</a>
         }
-        <!-- Botón de administración independiente -->
-        <a routerLink="/admin/dashboard" class="btn-admin-link" title="Panel de Administración">⚙️ Admin</a>
+        <!-- Botón de administración protegido con credenciales -->
+        <a (click)="ingresarAdmin()" class="btn-admin-link" title="Panel de Administración" style="cursor: pointer;">⚙️ Admin</a>
       </div>
     </nav>
 
@@ -104,6 +104,7 @@ import { SupabaseService } from '../../core/services/supabase';
         font-weight: bold;
         font-size: 0.9rem;
         border: 1px solid #2f3542;
+        cursor: pointer;
         &:hover { background-color: #2f3542; }
       }
     }
@@ -143,5 +144,26 @@ export class ClientLayoutComponent implements OnInit {
     await this.supabase.client.auth.signOut();
     this.isLoggedIn = false;
     this.router.navigate(['/login']);
+  }
+
+  ingresarAdmin() {
+    const usuario = prompt('Ingrese el usuario de Administrador:');
+    if (!usuario) return;
+
+    const password = prompt('Ingrese la contraseña de Administrador:');
+    if (!password) return;
+
+    const uLimpio = usuario.trim();
+    const pLimpio = password.trim();
+
+    if (
+      (uLimpio === 'ManuelQuintanaMiño' && pLimpio === 'UTN2026') ||
+      (uLimpio === 'JazminMereles' && pLimpio === 'UTN2026')
+    ) {
+      alert('¡Acceso concedido! Redirigiendo al Panel de Administración...');
+      this.router.navigate(['/admin/dashboard']);
+    } else {
+      alert('Usuario o contraseña incorrectos. Acceso denegado.');
+    }
   }
 }
